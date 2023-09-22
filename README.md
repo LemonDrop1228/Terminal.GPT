@@ -13,8 +13,9 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 
 Here are some previews of the terminal client in action:
 
-![Preview1](./Previews/WindowsTerminal_MOf3pzalEm.png)
-![Preview2](./Previews/WindowsTerminal_qktk7FAghI.png)
+![Preview1](./Previews/TStsAkJpj5.png)
+![Preview1.5](./Previews/83E4p5zLqf.gif)
+![Preview2](./Previews/7iTF6ZAxlY.png)
 
 ## Getting Started
 
