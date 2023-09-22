@@ -15,12 +15,12 @@ AppPublisher={#MyAppPublisher}
 DefaultDirName={autopf}\{#MyAppName}
 DefaultGroupName={#MyAppName}
 AllowNoIcons=yes
-LicenseFile=~/LICENSE
+LicenseFile=LICENSE
 ; Remove the following line to run in administrative install mode (install for all users.)
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputBaseFilename=Terminal-GPT_Setup
-SetupIconFile=~/AI_Brain.ico
+SetupIconFile=AI_Brain.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -32,8 +32,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "~/Terminal-GPT GITHUB/bin/Release/net6.0/win-x64/publish/{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "~/Terminal-GPT GITHUB/bin/Release/net6.0/win-x64/publish/*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "bin/Release/net6.0/win-x64/publish/{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "bin/Release/net6.0/win-x64/publish/*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
