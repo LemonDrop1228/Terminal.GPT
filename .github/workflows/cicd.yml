@@ -37,68 +37,17 @@ jobs:
           git tag ${{ steps.create_version.outputs.VERSION }}
           git push origin --tags
 
-name: TerminalGPT-CICD
-
-on:
-  push:
-    branches: [ release ]
-
-jobs:
-  create_release:
-    runs-on: windows-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '6.0.x'  # Specify the .NET 6 SDK here
-
-      - name: Build with dotnet
-        run: dotnet publish --configuration Release --output ./published
-
-      - name: Zip published directory
-        run: |
-          Compress-Archive -Path ./published/* -DestinationPath ./Terminal-GPT.zip
-
-      - name: Create version
-        id: create_version
-        run: |
-          echo "::set-output name=VERSION::$(date +'%s')"
-
-      - name: Create tag
-        id: create_tag
-        run: |
-          git config user.email "johnpaul@niswonger.tech"
-          git config user.name "LemonDrop1228"
-          git tag ${{ steps.create_version.outputs.VERSION }}
-          git push origin --tags
-
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RECIPE: 'Terminal-GPT v${{ steps.create_version.outputs.VERSION }}'
+        with:
           tag_name: ${{ steps.create_version.outputs.VERSION }}
-          release_name: Release ${{ steps.create_version.outputs.VERSION }}
-          body: ${{ env.RECIPE }}
+          release_name: Terminal-GPT v${{ steps.create_version.outputs.VERSION }}
+          body: Release ${{ steps.create_version.outputs.VERSION }}
           draft: false
           prerelease: false
-
-      - name: Upload Release Asset
-        id: upload-release-asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Terminal-GPT.zip
-          asset_name: Terminal-GPT.zip
-          asset_content_type: application/zip
-
 
       - name: Upload Release Asset
         id: upload-release-asset
