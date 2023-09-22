@@ -37,7 +37,7 @@ Source: "bin/Release/net6.0/win-x64/publish/*"; DestDir: "{app}"; Flags: ignorev
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}{#MyAppName}"; Filename: "{app}{#MyAppExeName}"
+Name: "AI_Brain.ico"; Filename: "AI_Brain"
 Name: "{group}{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
 Name: "{commondesktop}{#MyAppName}"; Filename: "{app}{#MyAppExeName}"; Tasks: desktopicon
 
