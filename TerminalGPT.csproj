@@ -5,6 +5,7 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <ApplicationIcon>AI_Brain.ico</ApplicationIcon>
     </PropertyGroup>
 
     <ItemGroup>
