@@ -40,7 +40,7 @@ public class MainService
                 .AddColumn("App")
                 .AddColumn("Version")
                 .AddColumn("GitHub Repo")
-                .AddRow("TerminalGPT", "1.0.0", "[link=https://github.com/your-repo]https://github.com/your-repo[/]")
+                .AddRow("TerminalGPT", "1.0.0", "[link=https://github.com/LemonDrop1228/Terminal-GPT]https://github.com/LemonDrop1228/Terminal-GPT[/]")
                 .Centered());
         AnsiConsole.Render(new Rule());
 
