@@ -1,5 +1,6 @@
 ﻿using Spectre.Console;
 using System.Linq;
+using System.Text;
 using Microsoft.Extensions.Options;
 using Spectre.Console.Rendering;
 using TerminalGPT.Constants;
@@ -49,10 +50,14 @@ public class MainService
             while (true)
             {
                 // Ask for user input
-                var input = AnsiConsole.Ask<string>("Prompt: ").Trim();
+                //var input = AnsiConsole.Ask<string>("Prompt: ").Trim();
+                
+                // custom solution to enable shift+enter for new lines
+                Console.Write("Prompt: ");
+                var input = ReadInput().Trim();
 
                 // Add user input to the display
-                var userHeader = $"{Environment.UserName} - {DateTime.Now}";
+                var userHeader = $"[cyan][bold]{Environment.UserName}[/][/] - {DateTime.Now}";
                 items = items.Concat(new[]
                         {new Panel($"{input}").Header(userHeader) as IRenderable})
                     .ToArray();
@@ -82,7 +87,7 @@ public class MainService
                 // Add AI's output to the display
                 var assistantHeader = $"TerminalGPT - {DateTime.Now}";
                 items = items.Concat(new[]
-                    {new Panel($"{response}").Header($"{assistantHeader}") as IRenderable}).ToArray();
+                    {new Panel($"{response}").Header($"[cyan][bold]{assistantHeader}[/][/]") as IRenderable}).ToArray();
 
 
                 items = items.Concat(new[] {new Rule().RuleStyle(Style.Parse("cyan")) as IRenderable})
@@ -95,6 +100,29 @@ public class MainService
             Console.WriteLine(e);
             Console.ReadKey();
         }
+    }
+    
+    private string ReadInput()
+    {
+        var input = new StringBuilder();
+        while (true)
+        {
+            var key = Console.ReadKey(intercept: true);
+            if (key.Key == ConsoleKey.Enter && ((key.Modifiers & ConsoleModifiers.Shift) != 0))
+            {
+                input.AppendLine();
+            }
+            else if (key.Key == ConsoleKey.Enter)
+            {
+                break;
+            }
+            else
+            {
+                input.Append(key.KeyChar);
+            }
+        }
+
+        return input.ToString();
     }
 
     private void DrawItems()
