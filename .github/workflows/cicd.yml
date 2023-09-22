@@ -44,6 +44,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./Output/Setup.exe
-          asset_name: Setup.exe
+          asset_path: ./Output/Terminal-GPT_Setup.exe
+          asset_name: Terminal-GPT_Setup.exe
           asset_content_type: application/octet-stream
