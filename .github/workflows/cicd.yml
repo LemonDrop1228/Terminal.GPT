@@ -24,14 +24,18 @@ jobs:
         run: |
           Compress-Archive -Path ./published/* -DestinationPath ./Terminal-GPT.zip
 
-      - name: Create tag
-        id: create_tag
+      - name: Create version
+        id: create_version
         run: |
           $VERSION = [int][double]::Parse((Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
           echo "VERSION=$VERSION" >> $GITHUB_ENV
+    
+      - name: Create tag
+        id: create_tag
+        run: |
           git config user.email "johnpaul@niswonger.tech"
           git config user.name "LemonDrop1228"
-          git tag $VERSION
+          git tag ${{ env.VERSION }}
           git push origin --tags
 
       - name: Create Release
