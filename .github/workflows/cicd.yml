@@ -9,17 +9,13 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      - name: Get the version
-        id: get_version
-        run: echo ::set-output name=VERSION::${GITHUB_REF#refs/heads/}      
-      
       - name: Checkout code
         uses: actions/checkout@v2
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'  # Specify the .NET 6 SDK here
+          dotnet-version: '6.0.x'
 
       - name: Build with dotnet
         run: dotnet publish --configuration Release --output ./published
@@ -28,14 +24,22 @@ jobs:
         run: |
           Compress-Archive -Path ./published/* -DestinationPath ./Terminal-GPT.zip
 
+      - name: Create tag
+        id: create_tag
+        run: |
+          VERSION=$(date +%s)        # Generate a tag using the Unix timestamp
+          git tag $VERSION
+          git push origin --tags
+          echo ::set-output name=VERSION::$(VERSION)
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.get_version.outputs.VERSION }}
-          release_name: Release ${{ steps.get_version.outputs.VERSION }}
+          tag_name: ${{ steps.create_tag.outputs.VERSION }}
+          release_name: Release ${{ steps.create_tag.outputs.VERSION }}
           draft: false
           prerelease: false
 
