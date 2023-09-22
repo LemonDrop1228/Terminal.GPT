@@ -1,0 +1,79 @@
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+
+# ReSharper is a .NET coding add-in
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# TeamCity is a build add-in
+_TeamCity*
+
+# Visual Studio 2015/2017 cache/options directory
+.vs/
+# Uncomment if you have tasks that create the project's static files in wwwroot
+#wwwroot/
+
+# MSBuild Binary and Structured Log
+*.binlog
+
+# Tools
+*.lock.json
+_project.lock.json
+project.lock.json
+.nuget_packages/
+*.nuspec
+
+# JetBrains Rider
+.idea/
+*.DotSettings
+
+# Miscellaneous
+sql/
+*.7z
+*.log
+*.sqlite
+
+# Include dll files
+*.dll
+# But ignore DLLs if they are part of NuGet Packages
+**/packages/*/*.dll
+# Uncomment lines below if you do not want to check in tooling dll
+# tools/*
+# !tools/*.addin
+# !tools/*.Module
+# /[Tt]ools/*.[Cc]ache
+
+# Ignore folders build and target
+/target/
+/build/
+
+# Ignore Tags (generated and maintained by Visual Studio)
+*.csv
+*.doc
+*.gif
+*.ico
+*.jpg
+*.png
+*.xsd
+*.xsl
+/Icon
+
+# Ignore crashlytics generated files
+com_crashlytics_export_strings.xml
