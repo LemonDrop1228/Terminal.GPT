@@ -20,7 +20,7 @@ LicenseFile=LICENSE
 PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
 OutputBaseFilename=Terminal-GPT_Setup
-SetupIconFile=AI_Brain.ico
+;SetupIconFile=AI_Brain.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -35,11 +35,6 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: "bin/Release/net6.0/win-x64/publish/{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "bin/Release/net6.0/win-x64/publish/*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
-
-[Icons]
-Name: "AI_Brain.ico"; Filename: "AI_Brain"
-Name: "{group}{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{commondesktop}{#MyAppName}"; Filename: "{app}{#MyAppExeName}"; Tasks: desktopicon
 
 
 [Run]
