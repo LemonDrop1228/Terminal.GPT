@@ -1,4 +1,4 @@
-﻿name: TerminalGPT-CICD
+﻿name: TerminalGPT-Release
 
 on:
   push:
