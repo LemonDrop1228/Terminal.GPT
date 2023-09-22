@@ -9,6 +9,14 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 - **OpenAI Integration**: Uses the official OpenAI-DotNet client library for seamless interaction with the ChatGPT model.
 - **Customizable Settings**: Configuration settings can be easily adjusted in the `appsettings.json` file.
 
+## Previews
+
+Here are some previews of the terminal client in action:
+
+![Preview1](./Previews/TStsAkJpj5.png)
+![Preview1.5](./Previews/83E4p5zLqf.gif)
+![Preview2](./Previews/7iTF6ZAxlY.png)
+
 ## Getting Started
 
 ### Prerequisites

@@ -1,8 +1,10 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using Microsoft.Extensions.Options;
 using OpenAI.Chat;
 using OpenAI.Models;
 using Spectre.Console;
+using TerminalGPT.Options;
 
 namespace TerminalGPT.Services;
 
@@ -23,12 +25,14 @@ public class ChatService : IChatService
     private ChatThread _currentThread;
     private readonly IOpenAIService _openAiService;
     private bool _isAiThinking;
+    private readonly TerminalGptOptions _options;
     public bool IsAIThinking { get; private set; }
 
-    public ChatService(IUserService userService, IOpenAIService openAiService)
+    public ChatService(IUserService userService, IOpenAIService openAiService, IOptions<TerminalGptOptions> options)
     {
         _openAiService = openAiService;
         _userService = userService;
+        _options = options.Value;
     }
     
     public ObservableCollection<ChatThread> ChatThreads
@@ -95,7 +99,7 @@ public class ChatService : IChatService
     public async Task CreateNewThread()
     {
         var newThread = new ChatThread() { Title = $"{_openAiService.CurrentModel.Id} Chat #{ChatThreads.Count + 1}", ModelId = _openAiService.CurrentModel.Id};
-        newThread.Messages.Add(new ChatMessage() { Message = new Message(Role.System, "You're a Wiki AI used for learning."), Timestamp = DateTime.Now });
+        newThread.Messages.Add(new ChatMessage() { Message = new Message(Role.System, _options.SystemPrompt ?? "You're a sassy AI that reminds the user they forgot to set a system prompt in their appsettings.json"), Timestamp = DateTime.Now });
         ChatThreads.Add(newThread);
         CurrentThread = newThread;
     }
