@@ -34,6 +34,13 @@ jobs:
           git push origin --tags
           echo "VERSION=$VERSION" | Out-File -FilePath $env:GITHUB_ENV -Append
 
+      - name: Get Buddha Quote
+        id: get_quote
+        run: |
+          $quote_json = Invoke-RestMethod 'https://api.zenquotes.io/?api=random'
+          $quote = $quote_json.q
+          echo "QUOTE=$quote" | Out-File -FilePath $env:GITHUB_ENV -Append
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -42,6 +49,7 @@ jobs:
         with:
           tag_name: ${{ env.VERSION }}
           release_name: Release ${{ env.VERSION }}
+          body: ${{ env.QUOTE }}
           draft: false
           prerelease: false
 
