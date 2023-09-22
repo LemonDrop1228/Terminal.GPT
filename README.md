@@ -15,6 +15,7 @@ Here are some previews of the terminal client in action:
 
 ![Preview1](./Previews/WindowsTerminal_MOf3pzalEm.png)
 ![Preview2](./Previews/WindowsTerminal_qktk7FAghI.png)
+(The wolf in the background is a desktop wallpaper, my terminal is transparent.)
 
 ## Getting Started
 
