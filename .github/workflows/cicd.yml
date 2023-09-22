@@ -29,14 +29,16 @@ jobs:
         run: |
           $VERSION = [int][double]::Parse((Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-    
+
       - name: Create tag
         id: create_tag
         run: |
           git config user.email "johnpaul@niswonger.tech"
           git config user.name "LemonDrop1228"
-          git tag ${{ env.VERSION }}
+          git tag $VERSION
           git push origin --tags
+        env:
+          VERSION: ${{ env.VERSION }}
 
       - name: Create Release
         id: create_release
