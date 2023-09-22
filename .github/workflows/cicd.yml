@@ -15,7 +15,7 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'  # Specify the .NET 6 SDK here
+          dotnet-version: '8.0.x'  # Specify the .NET 6 SDK here
 
       - name: Build with dotnet
         run: dotnet publish --configuration Release --output ./published
@@ -42,8 +42,7 @@ jobs:
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          RECIPE: '1. Preheat oven to 350 degrees F (175 degrees C).\n2. Cream together the butter, white sugar, and brown sugar until smooth.\n3. Beat in the eggs one at a time, then stir in the vanilla.\n4. Dissolve baking soda in hot water. Add to batter along with salt.\n5. Stir in flour, chocolate chips, and nuts.\n6. Drop by large spoonfuls onto ungreased pans.\n7. Bake for about 10 minutes in the preheated oven, or until edges are nicely browned.'
-        with:
+          RECIPE: 'Terminal-GPT v${{ steps.create_version.outputs.VERSION }}'
           tag_name: ${{ steps.create_version.outputs.VERSION }}
           release_name: Release ${{ steps.create_version.outputs.VERSION }}
           body: ${{ env.RECIPE }}
