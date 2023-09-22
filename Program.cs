@@ -53,7 +53,7 @@ class Program
                     eventArgs.Cancel = true;
                     Environment.Exit(0);
                 };
-
+                
                 await mainService.Run();
             }
             catch (Exception ex)
