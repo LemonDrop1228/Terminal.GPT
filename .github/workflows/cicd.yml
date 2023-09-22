@@ -1,4 +1,4 @@
-﻿name: TerminalGPT-Release
+﻿name: TerminalGPT-CICD
 
 on:
   push:
@@ -15,10 +15,10 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v1
         with:
-          dotnet-version: '6.0.x'
+          dotnet-version: '6.0.x'  # Specify the .NET 6 SDK here
 
       - name: Build with dotnet
-        run: dotnet publish --configuration Release --output ./published
+        run: dotnet publish --configuration Release --offset ./published
 
       - name: Zip published directory
         run: |
@@ -27,10 +27,12 @@ jobs:
       - name: Create tag
         id: create_tag
         run: |
-          VERSION=$(date +%s)        # Generate a tag using the Unix timestamp
+          $VERSION = [int][double]::Parse((Get-Date (Get-Date).ToUniversalTime() -UFormat %s))
+          git config user.email "johnpaul@niswonger.tech"
+          git config user.name "LemonDrop1228"
           git tag $VERSION
           git push origin --tags
-          echo ::set-output name=VERSION::$(VERSION)
+          echo "VERSION=$VERSION" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Create Release
         id: create_release
@@ -38,8 +40,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ steps.create_tag.outputs.VERSION }}
-          release_name: Release ${{ steps.create_tag.outputs.VERSION }}
+          tag_name: ${{ env.VERSION }}
+          release_name: Release ${{ env.VERSION }}
           draft: false
           prerelease: false
 
