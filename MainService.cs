@@ -12,7 +12,7 @@ namespace TerminalGPT.Services;
 public class MainService
 {
     private readonly IChatService _chatService;
-    private IRenderable[] items;
+    private List<IRenderable> items;
     private readonly IOpenAIService _openAiService;
     private readonly TerminalGptOptions _options;
 
@@ -26,52 +26,31 @@ public class MainService
         _openAiService = openAiService;
         _options = options.Value;
 
-        items = new IRenderable[] { };
+        items = new List<IRenderable>();
     }
 
     public async Task Run()
     {
-        AnsiConsole.Write(new FigletText(
-                FigletFont.Parse(AppConstants.FigletFont),
-                "Terminal-GPT")
-            .Centered()
-        );
-        AnsiConsole.Render(
-            new Table().Border(TableBorder.Rounded)
-                .AddColumn("App")
-                .AddColumn("Version")
-                .AddColumn("GitHub Repo")
-                .AddRow("TerminalGPT", "1.0.0", "[link=https://github.com/LemonDrop1228/Terminal-GPT]https://github.com/LemonDrop1228/Terminal-GPT[/]")
-                .Centered());
-        AnsiConsole.Render(new Rule());
+        DrawHeader();
 
         try
         {
             while (true)
             {
-                // Ask for user input
-                //var input = AnsiConsole.Ask<string>("Prompt: ").Trim();
+                //Set the console background color
+                AnsiConsole.Background = Color.DarkBlue;
                 
-                // custom solution to enable shift+enter for new lines
-                Console.Write("Prompt: ");
-                var input = ReadInput().Trim();
+                // Get input from user
+                var input = AnsiConsole.Ask<string>($"[cyan][bold]{Environment.UserName}[/][/]:");
 
-                // Add user input to the display
-                var userHeader = $"[cyan][bold]{Environment.UserName}[/][/] - {DateTime.Now}";
-                items = items.Concat(new[]
-                        {new Panel($"{input}").Header(userHeader) as IRenderable})
-                    .ToArray();
-                DrawItems();
+                AddItemToDisplay(input, $"[cyan][bold]{Environment.UserName}[/][/] - {DateTime.Now}", true);
 
-
-                // Show a spinner while the AI is thinking
                 await AnsiConsole.Status().Spinner(Spinner.Known.Star)
-                    .StartAsync("[cyan][bold]TerminalGPT[/][/] is thinking...", async spinnerCtx =>
+                    .StartAsync("[gold3][bold]TerminalGPT[/][/] is thinking...", async spinnerCtx =>
                     {
                         await _chatService.AddMessageToCurrentThread(input, "User");
                         
-                        // AI is done
-                        spinnerCtx.Status = "TerminalGPT is done thinking...";
+                        spinnerCtx.Status = "[gold3][bold]TerminalGPT[/][/] is done thinking...";
                         spinnerCtx.Spinner = Spinner.Known.Star2;
                         spinnerCtx.SpinnerStyle = Style.Parse("green");
                         spinnerCtx.Refresh();
@@ -81,18 +60,7 @@ public class MainService
 
                 var response = _chatService.CurrentThread.Messages.Last().Message.Content;
 
-                items = items.Concat(new[] {new Rule().RuleStyle(Style.Parse("cyan")) as IRenderable})
-                    .ToArray(); // divider line
-
-                // Add AI's output to the display
-                var assistantHeader = $"TerminalGPT - {DateTime.Now}";
-                items = items.Concat(new[]
-                    {new Panel($"{response}").Header($"[cyan][bold]{assistantHeader}[/][/]") as IRenderable}).ToArray();
-
-
-                items = items.Concat(new[] {new Rule().RuleStyle(Style.Parse("cyan")) as IRenderable})
-                    .ToArray(); // divider line
-                DrawItems();
+                AddItemToDisplay(response, $"TerminalGPT - {DateTime.Now}");
             }
         }
         catch (Exception e)
@@ -102,51 +70,43 @@ public class MainService
         }
     }
     
-    private string ReadInput()
-    {
-        var input = new StringBuilder();
-        while (true)
-        {
-            var key = Console.ReadKey(intercept: true);
-            if (key.Key == ConsoleKey.Enter && ((key.Modifiers & ConsoleModifiers.Shift) != 0))
-            {
-                input.AppendLine();
-            }
-            else if (key.Key == ConsoleKey.Enter)
-            {
-                break;
-            }
-            else
-            {
-                input.Append(key.KeyChar);
-            }
-        }
 
-        return input.ToString();
+    private void DrawHeader()
+    {
+        AnsiConsole.Write(new FigletText(
+                FigletFont.Parse(AppConstants.FigletFont),
+                "T e r m i n a l . G P T")
+            .Centered()
+            .Color(Color.Aquamarine3)
+        );
+        
+        AnsiConsole.Render(
+            new Table().Border(TableBorder.Rounded)
+                .AddColumn("App")
+                .AddColumn("Version")
+                .AddColumn("GitHub Repo")
+                .AddRow("[gold1]T[/]erminal[gold1]GPT[/]", "[red][bold]1.0.0[/][/]", "[blue][link=https://github.com/LemonDrop1228/Terminal-GPT]https://github.com/LemonDrop1228/Terminal-GPT[/][/]")
+                .Centered());
+        AnsiConsole.Render(new Rule());
     }
 
     private void DrawItems()
     {
         AnsiConsole.Clear();
 
-        AnsiConsole.Write(new FigletText(
-                FigletFont.Parse(AppConstants.FigletFont),
-                "Terminal-GPT")
-            .Centered()
-        );
-        AnsiConsole.Render(
-            new Table().Border(TableBorder.Rounded)
-                .AddColumn("App")
-                .AddColumn("Version")
-                .AddColumn("GitHub Repo")
-                .AddRow("TerminalGPT", "1.0.0", "[link=https://github.com/your-repo]https://github.com/your-repo[/]")
-                .Centered());
-        AnsiConsole.Render(new Rule());
+        DrawHeader();
 
         foreach (var item in items)
         {
             AnsiConsole.Render(item);
         }
+    }
+
+    private void AddItemToDisplay(string content, string header, bool isUser = false)
+    {
+        items.Add(new Panel($"{content}").Header(isUser ? $"[cyan][bold]{header}[/][/]" : $"[gold3][bold]{header}[/][/]"));
+        items.Add(new Rule().RuleStyle(Style.Parse("cyan")));
+        DrawItems();
     }
 
     public async Task Initialize()
