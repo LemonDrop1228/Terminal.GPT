@@ -32,24 +32,17 @@ jobs:
           git config user.name "LemonDrop1228"
           git tag $VERSION
           git push origin --tags
-          echo "VERSION=$VERSION" | Out-File -FilePath $env:GITHUB_ENV -Append
-
-      - name: Get Buddha Quote
-        id: get_quote
-        run: |
-          $quote_json = Invoke-RestMethod 'https://api.zenquotes.io/?api=random'
-          $quote = $quote_json.q
-          echo "QUOTE=$quote" | Out-File -FilePath $env:GITHUB_ENV -Append
 
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RECIPE: '1. Preheat oven to 350 degrees F (175 degrees C).\n2. Cream together the butter, white sugar, and brown sugar until smooth.\n3. Beat in the eggs one at a time, then stir in the vanilla.\n4. Dissolve baking soda in hot water. Add to batter along with salt.\n5. Stir in flour, chocolate chips, and nuts.\n6. Drop by large spoonfuls onto ungreased pans.\n7. Bake for about 10 minutes in the preheated oven, or until edges are nicely browned.'
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: Release ${{ env.VERSION }}
-          body: ${{ env.QUOTE }}
+          tag_name: $VERSION
+          release_name: Release $VERSION
+          body: ${{ env.RECIPE }}
           draft: false
           prerelease: false
 
