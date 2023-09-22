@@ -6,7 +6,6 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 ## Features
 
 - **Terminal-based Interaction**: Engage with the ChatGPT model directly from your terminal.
-- **.NET 8.0 Powered**: Built on the latest .NET platform, benefitting from its performance and efficiency improvements.
 - **OpenAI Integration**: Uses the official OpenAI-DotNet client library for seamless interaction with the ChatGPT model.
 - **Customizable Settings**: Configuration settings can be easily adjusted in the `appsettings.json` file.
 
@@ -16,7 +15,7 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 
 - An OpenAI API key: Required to interact with the ChatGPT model.
 - An OpenAI Organization: Required to create an OpenAI account and obtain an API key.
-- .NET 8.0 SDK: Required to build and run the application.
+- .NET 6.0 SDK: Required to build and run the application.
 
 ### Installation
 
@@ -50,3 +49,9 @@ This project is licensed under the GNU General Public License v3.0. This license
 - [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) for its high-performance JSON framework.
 - [ OpenAI-API-dotnet](https://github.com/OkGoDoIt/OpenAI-API-dotnet) for the official .NET client library for the OpenAI API.
 - [Spectre.Console](https://github.com/spectreconsole/spectre.console) for enabling the creation of beautiful console applications.
+
+## Donation
+
+If you find this project helpful and would like to support its development, you can make a donation via PayPal. Your contribution will help us continue improving and maintaining this project.
+
+[PayPal](https://www.paypal.com/donate/?business=J8UBHVFCN2EEN&no_recurring=0&currency_code=USD)
