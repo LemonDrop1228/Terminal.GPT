@@ -37,9 +37,10 @@ Source: "bin/Release/net6.0/win-x64/publish/*"; DestDir: "{app}"; Flags: ignorev
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
-Name: "{group}/{#MyAppName}"; Filename: "{app}/{#MyAppExeName}"
-Name: "{group}/{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
-Name: "{autodesktop}/{#MyAppName}"; Filename: "{app}/{#MyAppExeName}"; Tasks: desktopicon
+Name: "{group}{#MyAppName}"; Filename: "{app}{#MyAppExeName}"
+Name: "{group}{cm:UninstallProgram,{#MyAppName}}"; Filename: "{uninstallexe}"
+Name: "{commondesktop}{#MyAppName}"; Filename: "{app}{#MyAppExeName}"; Tasks: desktopicon
+
 
 [Run]
 Filename: "{app}/{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
