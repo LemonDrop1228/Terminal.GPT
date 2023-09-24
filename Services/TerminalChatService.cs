@@ -2,6 +2,7 @@
 using Spectre.Console;
 using System.Linq;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using TerminalGPT.Constants;
 using TerminalGPT.Options;
 using Spectre.Console.Rendering;
@@ -50,7 +51,11 @@ public class TerminalChatService : BaseService, ITerminalChatService
             while (!_cancellationTokenSource.Token.IsCancellationRequested)
             {
                 AnsiConsole.Background = Color.DarkBlue;
-                var input = AnsiConsole.Ask<string>($"[green][bold]{Environment.UserName}[/][/]:");
+                var input = string.Empty;
+                while (string.IsNullOrWhiteSpace(input = AnsiConsole.Ask<string>($"[green][bold]{Environment.UserName}[/][/]")))
+                {
+                    await Task.Delay(1000);
+                }
 
                 if (_commandService.TryParseCommand(input, out var command))
                 {
@@ -115,11 +120,32 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
     public void AddItemToDisplay(string content, string header, bool isUser = false)
     {
-        items.Add(new Panel($"{content}").Header(isUser
-            ? $"[green][bold]{header}[/][/]"
-            : $"[cyan][bold]{header}[/][/]"));
+        
+        
+        try
+        {
+            items.Add(new Panel($"{content}").Header(isUser
+                ? $"[green][bold]{header}[/][/]"
+                : $"[cyan][bold]{header}[/][/]"));
+        }
+        catch (Exception e)
+        {
+            items.Add(new Panel($"{ScrubMarkup(content)}").Header(isUser
+                ? $"[green][bold]{header}[/][/]"
+                : $"[cyan][bold]{header}[/][/]"));
+        }
+        
+        
         items.Add(new Rule().RuleStyle(Style.Parse("cyan")));
         DrawItems();
+    }
+
+    private string ScrubMarkup(string content)
+    {
+        // Use regex to remove any spectre.console markup from the content
+        var regex = new Regex(@"\[(.*?)\]");
+        content = regex.Replace(content, "");
+        return content;
     }
 
     public void DrawItems()
