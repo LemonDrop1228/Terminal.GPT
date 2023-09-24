@@ -122,7 +122,6 @@ public class ChatService : IChatService
     
     public async Task Save()
     {
-        AnsiConsole.Clear();
         // async save current thread to disk as json
         // if the current thread is null, do nothing
         if (CurrentThread == null)
@@ -137,27 +136,30 @@ public class ChatService : IChatService
         }
         
         AnsiConsole.MarkupLine($"[green]Saving chat to {path}[/]");
-
-        try
-        {
-            var filePath = Path.Combine(path, $"{CurrentThread.Title}.{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.json");
-            var json = JsonConvert.SerializeObject(CurrentThread);
-            await File.WriteAllTextAsync(filePath, json);
-        }
-        catch (Exception e)
-        {
-            AnsiConsole.MarkupLine($"[red]An error occurred while saving the chat: {e.Message}[/]");
-            return;
-        }
         
-        AnsiConsole.MarkupLine($"[green]Chat saved to {path}[/]");
-        // ask if the user wants to open the folder where the chat was saved
-        var openFolder = AnsiConsole.Confirm("Would you like to open the folder where the chat was saved?");
-        if (openFolder)
-        {
-            Process.Start("explorer.exe", path);
-        }
-        
+        // ansi status spinner
+        await AnsiConsole.Status().Spinner(Spinner.Known.Star)
+            .StartAsync("[cyan][bold]TerminalGPT[/][/] is saving...", async spinnerCtx =>
+            {
+                try
+                {
+                    var json = JsonConvert.SerializeObject(CurrentThread, Formatting.Indented);
+                    var fileName = $"{CurrentThread.Title.Replace(" ", "_")}.{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.json";
+                    var filePath = Path.Combine(path, fileName);
+                    await File.WriteAllTextAsync(filePath, json);
+                    Task.Delay(1000).Wait();
+                    spinnerCtx.Status = "[cyan][bold]TerminalGPT[/][/] is done saving...";
+                    spinnerCtx.Spinner = Spinner.Known.Star2;
+                    spinnerCtx.SpinnerStyle = Style.Parse("green");
+                    spinnerCtx.Refresh();
+                    Task.Delay(1000).Wait();
+                }
+                catch (Exception e)
+                {
+                    // Tell the user something went wrong swallowing the exception
+                    AnsiConsole.MarkupLine($"[red]An error occurred while saving: {e.Message}[/]");
+                }
+            });
     }
     
 }
