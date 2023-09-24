@@ -1,10 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Diagnostics;
 using Microsoft.Extensions.Options;
 using OpenAI.Chat;
 using OpenAI.Models;
 using Spectre.Console;
 using TerminalGPT.Options;
+using Newtonsoft.Json;
 
 namespace TerminalGPT.Services;
 
@@ -16,6 +18,7 @@ public interface IChatService
     Task CreateNewThread();
     Task DeleteThread(ChatThread thread);
     bool IsAIThinking { get; }
+    Task Save();
 }
 
 public class ChatService : IChatService
@@ -115,6 +118,46 @@ public class ChatService : IChatService
         {
             CurrentThread = ChatThreads.FirstOrDefault();
         }
+    }
+    
+    public async Task Save()
+    {
+        AnsiConsole.Clear();
+        // async save current thread to disk as json
+        // if the current thread is null, do nothing
+        if (CurrentThread == null)
+        {
+            return;
+        }
+        
+        var path = Path.Combine(Environment.CurrentDirectory, "chats");
+        if (!Directory.Exists(path))
+        {
+            Directory.CreateDirectory(path);
+        }
+        
+        AnsiConsole.MarkupLine($"[green]Saving chat to {path}[/]");
+
+        try
+        {
+            var filePath = Path.Combine(path, $"{CurrentThread.Title}.{DateTime.Now.ToString("yyyy-MM-dd-HH-mm-ss")}.json");
+            var json = JsonConvert.SerializeObject(CurrentThread);
+            await File.WriteAllTextAsync(filePath, json);
+        }
+        catch (Exception e)
+        {
+            AnsiConsole.MarkupLine($"[red]An error occurred while saving the chat: {e.Message}[/]");
+            return;
+        }
+        
+        AnsiConsole.MarkupLine($"[green]Chat saved to {path}[/]");
+        // ask if the user wants to open the folder where the chat was saved
+        var openFolder = AnsiConsole.Confirm("Would you like to open the folder where the chat was saved?");
+        if (openFolder)
+        {
+            Process.Start("explorer.exe", path);
+        }
+        
     }
     
 }

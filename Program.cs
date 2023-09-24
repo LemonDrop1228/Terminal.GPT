@@ -20,10 +20,14 @@ class Program
             .ConfigureServices((hostContext, services) =>
             {
                 services.Configure<TerminalGptOptions>(hostContext.Configuration.GetSection("Options"));
+                services.AddSingleton<IChatCommandService, ChatCommandService>();
+                services.AddSingleton<IExitService, ExitService>();
                 services.AddSingleton<IOpenAIClientFactory, OpenAIClientFactory>();
                 services.AddSingleton<IOpenAIService, OpenAiService>();
                 services.AddSingleton<IUserService, UserService>();
                 services.AddSingleton<IChatService, ChatService>();
+                services.AddSingleton<IMenuService, MenuService>();
+                services.AddSingleton<ITerminalChatService, TerminalChatService>();
                 services.AddSingleton<MainService>();
             })
             .Build();
@@ -35,6 +39,7 @@ class Program
             try
             {
                 var options = services.GetRequiredService<IOptions<TerminalGptOptions>>().Value;
+                var openAiService = services.GetRequiredService<IOpenAIService>();
                 var mainService = services.GetRequiredService<MainService>();
                 if (string.IsNullOrEmpty(options.ApiKey) || string.IsNullOrEmpty(options.OrgId) || options.Model == null)
                 {
@@ -44,7 +49,7 @@ class Program
                 }
                 else
                 {
-                    await mainService.Initialize();
+                    await openAiService.ValidateApiKeyAsync();
                 }
                 var now = DateTime.Now;
                 // listen for ctrl+c and exit
