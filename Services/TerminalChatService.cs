@@ -108,7 +108,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 .AddColumn("Version")
                 .AddColumn("GitHub Repo")
                 .AddRow("[red][bold]1.0.0[/][/]",
-                    "[blue][link=https://github.com/LemonDrop1228/Terminal-GPT]https://github.com/LemonDrop1228/Terminal-GPT[/][/]")
+                    "[blue][link=https://github.com/LemonDrop1228/Terminal.GPT]https://github.com/LemonDrop1228/Terminal.GPT[/][/]")
                 .Centered());
         AnsiConsole.Render(new Rule());
     }
