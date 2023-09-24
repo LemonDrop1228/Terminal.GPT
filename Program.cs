@@ -20,10 +20,13 @@ class Program
             .ConfigureServices((hostContext, services) =>
             {
                 services.Configure<TerminalGptOptions>(hostContext.Configuration.GetSection("Options"));
+                services.AddSingleton<IChatCommandService, ChatCommandService>();
+                services.AddSingleton<IExitService, ExitService>();
                 services.AddSingleton<IOpenAIClientFactory, OpenAIClientFactory>();
                 services.AddSingleton<IOpenAIService, OpenAiService>();
                 services.AddSingleton<IUserService, UserService>();
                 services.AddSingleton<IChatService, ChatService>();
+                services.AddSingleton<IMenuService, MenuService>();
                 services.AddSingleton<ITerminalChatService, TerminalChatService>();
                 services.AddSingleton<MainService>();
             })

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Spectre.Console;
 using TerminalGPT.Options;
 using Microsoft.Extensions.Options;
+using TerminalGPT.Enums;
 
 namespace TerminalGPT.Services
 {
@@ -10,19 +11,68 @@ namespace TerminalGPT.Services
     {
         private readonly ITerminalChatService _terminalChatService;
         private readonly IOpenAIService _openAiService;
+        private readonly IMenuService _menuService;
+        private readonly IExitService _exitService;
+        private readonly IChatCommandService _chatCommandService;
 
-        public MainService(ITerminalChatService terminalChatService, IOpenAIService openAiService)
+        public MainService(
+            ITerminalChatService terminalChatService, 
+            IOpenAIService openAiService, 
+            IMenuService menuService,
+            IExitService exitService,
+            IChatCommandService chatCommandService
+            )
         {
             _terminalChatService = terminalChatService;
             _openAiService = openAiService;
+            _menuService = menuService;
+            _exitService = exitService;
+            _chatCommandService = chatCommandService;
         }
 
         public async Task Run()
         {
+            _chatCommandService.InitializeCommands();
+            
             try
             {
-                await _openAiService.ValidateApiKeyAsync();
-                await _terminalChatService.RunChat();
+                while (ServiceMode.Value != ServiceMode.Mode.Exit)
+                {
+                    ExitCode.Code main = ServiceMode.Value switch
+                    {
+                        ServiceMode.Mode.Chat => await _terminalChatService.Start(),
+                        /*ServiceMode.Mode.Help => await _terminalChatService.RunHelp(),*/
+                        ServiceMode.Mode.Menu => await _menuService.Start(),
+                        ServiceMode.Mode.Exit => await _exitService.Exit(),
+                        _ => throw new ArgumentOutOfRangeException()
+                    };
+                    
+                    
+                    if (main == ExitCode.Code.CleanExit)
+                    {
+                        break;
+                    }
+                    else if (main == ExitCode.Code.Error)
+                    {
+                        Console.WriteLine("An error occurred. Exiting...");
+                        // placeholder for error reporting
+                        Console.WriteLine("Press any key to exit...");
+                        Console.ReadLine();
+                        ServiceMode.Set(ServiceMode.Mode.Exit);
+                    }
+                    
+                    ServiceMode.Set
+                    (
+                        ServiceMode.Value switch
+                        {
+                            ServiceMode.Mode.Chat => ServiceMode.Mode.Menu,
+                            ServiceMode.Mode.Menu => ServiceMode.Mode.Chat
+                        }
+                    );
+                }
+                
+                
+                
             }
             catch (Exception ex)
             {
