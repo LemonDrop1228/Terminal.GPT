@@ -18,16 +18,16 @@ The installation process for `Terminal.GPT` is automated via a `PowerShell scrip
 2. Run the following command to allow the execution of scripts:
 
 ```powershell
-# Required to run remote scripts.
 Set-ExecutionPolicy Bypass -Scope Process -Force;
 ```
+ > this is required to enable remote script execution
 
 3. Download and run the installation script using the following command:
 
 ```powershell
-# Downloads the script bypassing any cached versions.
-Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/LemonDrop1228/Terminal.GPT/main/EasyInstall_Script.ps1') -UseBasicParsing
+Invoke-Expression -Command ((Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/LemonDrop1228/Terminal.GPT/main/EasyInstall_Script.ps1' -UseBasicParsing).Content)
 ```
+ > this downloads the latest easy install script bypassing cached versions, and executes the interactive installation session
 
 
  > This script will download the latest release of Terminal.GPT, unzip the archive, move the unzipped contents to your `LOCALAPPDATA` directory, and create a shortcut on your Desktop. If an error is encountered during any of these steps, the script will clean up any files it created before the error occurred.
