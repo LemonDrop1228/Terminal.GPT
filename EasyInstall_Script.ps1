@@ -1,23 +1,13 @@
-# Function to generate the command to be added
-function addPathToEnvironmentVariableCommand ($appPath) {
-    if (!(Test-Path $appPath)) {
-        Write-Host "App path '$appPath' does not exist. Exiting script."
-        return
+# Function to update the Path Enviroment Variable
+function addToPathEnvironmentVariable ($appPath) {
+    $Path = [Environment]::GetEnvironmentVariable('Path', [System.EnvironmentVariableTarget]::Machine)
+    if ($Path -notlike "*;$appPath*") {
+        [Environment]::SetEnvironmentVariable('Path', "$Path;$appPath", [System.EnvironmentVariableTarget]::Machine)
     }
-
-    $messageBody = @"
-To add TerminalGPT.exe's root path to the system environment variables, please copy and paste the following command into your PowerShell:
-        [Environment]::SetEnvironmentVariable('PATH','$ENV:Path+';'+'$appPath',[System.EnvironmentVariableTarget]::User)
-    This command adds TerminalGPT into the PATH system environment variables, allowing you to easily run TerminalGPT from any command prompt or PowerShell session without specifying the full path to TerminalGPT.exe.
-    
-"@
-    
-    Write-Host $messageBody
 }
 
-
-# Initialize WebClient
-$client = New-Object System.Net.WebClient
+# Initialize HttpClient
+$client = New-Object System.Net.Http.HttpClient
 
 # URL and file path setting
 $url = 'https://github.com/LemonDrop1228/Terminal.GPT/releases/latest/download/Terminal-GPT.zip'
@@ -49,13 +39,38 @@ function cleanupOnError() {
     }
 }
 
-Write-Host "Attempting to download Terminal-GPT.zip from `n$url"
+# Download file with progress tracking
 try {
-    $client.DownloadFile($url, $file)
-    # write the downloaded file path to the console
-    Write-Host "`nDownloaded file saved to $file"
-    Write-Host "`nDownload Successful. Press any key to proceed to the next step."
-    pause
+    $response = $client.GetAsync($url).Result
+    $response.EnsureSuccessStatusCode()
+
+    $totalLength = $response.Content.Headers.ContentLength
+    $contentStream = [System.IO.File]::Create($file)
+
+    try {
+        $downloadStream = $response.Content.ReadAsStreamAsync().Result
+        $buffer = New-Object Byte[] 8192
+        $progress = @{
+            Id = 1
+            Activity = "Downloading..."
+            Status = "Bytes read"
+            CurrentOperation = $contentStream.Position
+            PercentComplete = 0
+        }
+        $totalRead = $null
+
+        do {
+            $read = $downloadStream.Read($buffer, 0, $buffer.Length)
+            $contentStream.Write($buffer, 0, $read)
+            $totalRead += $read
+            $progress.CurrentOperation = "Downloaded {0:N2} MB of {1:N2} MB" -f ($totalRead / 1MB), ($totalLength / 1MB)
+            $progress.PercentComplete = ($totalRead / $totalLength) * 100
+            Write-Progress @progress
+        } until ($read -eq 0)
+    }
+    finally {
+        $contentStream.Dispose()
+    }
 }
 catch {
     Write-Host "`nDownload Failed with the following exception: $_. Please make sure you're connected to the internet."
@@ -64,6 +79,7 @@ catch {
     cleanupOnError
     exit
 }
+
 $shell = New-Object -ComObject shell.application
 $zip = $shell.NameSpace($file)
 $destination = "$env:LOCALAPPDATA\TerminalGPT"
@@ -71,34 +87,41 @@ $destination = "$env:LOCALAPPDATA\TerminalGPT"
 # if the destination folder exists, remove it
 if(Test-Path $destination) {
     Write-Host "`nRemoving any previous files at $destination"
-    Remove-Item -Path $destination -Recurs
+    Remove-Item -Path $destination -Recurse
 }
 
 # create destination folder 
 Write-Host "`nCreating destination folder at $destination"
 New-Item -Path $destination -ItemType Directory
 
-Write-Host "`nProcess to unzip and move the files will now start"
-# write the destination path to the console
-Write-Host "`nUnzipping files to $destination"
+# Extracting files with progress indicator
+$items = $zip.items()
+$totalItems = $items.Count
+$i = 0;
+$progress = @{
+    Activity = "Extracting files..."
+    PercentComplete = 0
+}
 
-try {
-    foreach($item in $zip.items()){
+foreach($item in $items) {
+    try {
         $shell.Namespace($destination).copyhere($item)
     }
-    Write-Host "`nFile extraction Successful. Press any key to proceed to the next step."
-    pause
-}
-catch {
-    Write-Host "`nFailed to unzip files with the following exception: $_. Please ensure you have necessary privileges."
-    Write-Host "Press any key to clean up and exit the script."
-    pause
-    cleanupOnError
-    exit
+    catch {
+        Write-Host "`nFailed to unzip file with the following exception: $_. Please ensure you have necessary privileges."
+        Write-Host "Press any key to clean up and exit the script."
+        pause
+        cleanupOnError
+        exit
+    }
+
+    $i++
+    $progress.PercentComplete = ($i / $totalItems) * 100
+    Write-Progress @progress
 }
 
 Remove-Item -Path $file
-    $shortcutLocation = "$env:USERPROFILE\Desktop\TerminalGPT.lnk"
+$shortcutLocation = "$env:USERPROFILE\Desktop\TerminalGPT.lnk"
 
 Write-Host "`nShortcut creation process will now start"
 if(Test-Path -Path $shortcutLocation) {
@@ -112,8 +135,6 @@ $Shortcut.TargetPath = "$destination\TerminalGPT.exe"
 
 try {
     $Shortcut.Save()
-    Write-Host "`nShortcut creation Successful. Press any key to proceed."
-    pause
 }
 catch {
     Write-Host "`nShortcut creation failed with the following exception: $_. Please make sure you're running this script as an Administrator."
@@ -123,7 +144,16 @@ catch {
     exit
 }
 
-# Final message
+# Installation completion message
 Write-Host "`nInstallation completed! A shortcut to TerminalGPT has been created on your Desktop."
-addPathToEnvironmentVariableCommand($destination)
+
+# Ask the user if they want to add the path to the Environment Variables
+$response = Read-Host 'Would you like to add TerminalGPT to system environment variables? (Y/N)'
+if ($response -eq 'Y') {
+    addToPathEnvironmentVariable($destination)
+    Write-Host "`nTerminalGPT added to the system environment variables."
+} else {
+    Write-Host "`nTerminalGPT was not added to the system enironment variables."
+}
+
 Write-Host "`nPress any key to exit the script."
