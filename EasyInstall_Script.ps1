@@ -68,6 +68,8 @@ $zip = $shell.NameSpace($file)
 $destination = "$env:LOCALAPPDATA\TerminalGPT"
 
 Write-Host "`nProcess to unzip and move the files will now start"
+# write the destination path to the console
+Write-Host "`nUnzipping files to $destination"
 if(Test-Path $destination) {
     Write-Host "`nRemoving any previous files at $destination"
     Remove-Item -Path $destination -Recurse
