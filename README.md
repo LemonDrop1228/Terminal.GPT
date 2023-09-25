@@ -9,6 +9,40 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 - **OpenAI Integration**: Uses the official OpenAI-DotNet client library for seamless interaction with the ChatGPT model.
 - **Customizable Settings**: Configuration settings can be easily adjusted in the `appsettings.json` file.
 
+## Installation
+
+The installation process for `Terminal.GPT` is automated via a `PowerShell script` that sits at the root of the repository. Here is the step-by-step process:
+
+1. Open `PowerShell` as an **Administrator**.
+
+2. Run the following command to allow the execution of scripts:
+
+```powershell
+Set-ExecutionPolicy Bypass -Scope Process -Force;
+```
+
+3. Download and run the installation script using the following command:
+
+```powershell
+Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/LemonDrop1228/Terminal.GPT/main/EasyInstall_Script.ps1')
+```
+
+
+ > This script will download the latest release of Terminal.GPT, unzip the archive, move the unzipped contents to your `LOCALAPPDATA` directory, and create a shortcut on your Desktop. If an error is encountered during any of these steps, the script will clean up any files it created before the error occurred.
+
+4. At the end of the installation, you'll be provided with a command you can copy and run in your PowerShell session to add Terminal.GPT to your `PATH` environment variable. This step is recommended as it allows you to run TerminalGPT from any location:
+
+```powershell
+[Environment]::SetEnvironmentVariable("PATH",`$ENV:Path+";{appPath}", [System.EnvironmentVariableTarget]::User)
+```
+#### _Notes_
+
+> Once these steps are complete, you can launch Terminal.GPT from any PowerShell or Command Prompt session by typing `TerminalGPT`.
+
+> For more details on how to interact with the Terminal.GPT, please see the 'Usage' section.
+
+
+
 ## Roadmap
 
 - [x] Basic terminal interface
@@ -65,7 +99,7 @@ Here are some previews of the terminal client in action:
 - An OpenAI Organization: Required to create an OpenAI account and obtain an API key.
 - .NET 6.0 SDK: Required to build and run the application.
 
-### Installation
+### Source Code
 
 1. Clone the repository to your local machine.
 2. Open the solution in your preferred .NET-compatible IDE (like JetBrains Rider or Visual Studio).
