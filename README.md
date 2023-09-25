@@ -8,6 +8,9 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 - **Terminal-based Interaction**: Engage with the ChatGPT model directly from your terminal.
 - **OpenAI Integration**: Uses the official OpenAI-DotNet client library for seamless interaction with the ChatGPT model.
 - **Customizable Settings**: Configuration settings can be easily adjusted in the `appsettings.json` file.
+- **Enhanced input**: Input is enhanced with a custom input system that allows for the use of arrow keys, backspace, and more. (PageDown is used for newlines.)
+- **Simple Installation**: Installation is automated via a PowerShell script that downloads the latest release and sets up the application for you.
+- **More**: More features are planned for the future. See the 'Roadmap' section for more details.
 
 ## Installation
 
@@ -79,6 +82,9 @@ Invoke-Expression (Invoke-WebRequest -Uri https://raw.githubusercontent.com/Lemo
 - [ ] Shell integration (Windows)
 - [ ] Shell integration (Linux)
 - [ ] Shell integration (macOS)
+- [ ] OS-specific installation scripts
+- [ ] Scoop/Chocolatey package/bucket
+- [ ] OS automation - interact with your OS via Terminal.GPT and operate your computer with natural language
 
 
 ## Previews
