@@ -1,5 +1,7 @@
 ﻿using Spectre.Console;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Spectre.Console.Rendering;
 
 namespace TerminalGPT.Services;
 
@@ -139,19 +141,26 @@ public class UserInputService : IUserInputService
         var markupText = " ";
         if (input1 is not null)
         {
-            var markupInput = input1.Substring(0, cursorPosition) + caret +
+            var markupInput = input1.Substring(0, cursorPosition) +
                               input1.Substring(cursorPosition);
             markupText = (markupInput.StartsWith("/") && !markupInput.Contains(" "))
                 ? $"[yellow]/[/][purple]{markupInput[1..]}[/]"
                 : markupInput;
         }
         else
-            markupText = $" {caret}";
+            markupText = $" ";
 
-        return new Panel(new Markup(markupText))
+        return new Panel(new Markup($"{Markup.Escape(markupText)}{caret}"))
             .Header(header)
             .Border(BoxBorder.Ascii)
             .HeaderAlignment(Justify.Center)
             .Expand();
+    }
+    
+    private string ScrubMarkup(string content)
+    {
+        var regex = new Regex(@"\[(.*?)\]");
+        content = regex.Replace(content, "");
+        return content;
     }
 }
