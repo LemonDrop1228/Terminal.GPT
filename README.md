@@ -18,13 +18,15 @@ The installation process for `Terminal.GPT` is automated via a `PowerShell scrip
 2. Run the following command to allow the execution of scripts:
 
 ```powershell
+# Required to run remote scripts.
 Set-ExecutionPolicy Bypass -Scope Process -Force;
 ```
 
 3. Download and run the installation script using the following command:
 
 ```powershell
-Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/LemonDrop1228/Terminal.GPT/main/EasyInstall_Script.ps1')
+# Downloads the script bypassing any cached versions.
+Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/LemonDrop1228/Terminal.GPT/main/EasyInstall_Script.ps1') -UseBasicParsing
 ```
 
 
