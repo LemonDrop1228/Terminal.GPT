@@ -8,6 +8,9 @@ public class TerminalGptOptions : IOptions<TerminalGptOptions>
     public string? OrgId { get; set; }
     public GPTModel? Model { get; set; }
     public string? SystemPrompt { get; set; }
+    public bool ShowSystemPrompt { get; set; }
+    public bool ShowChatTitle { get; set; }
+    public bool ShowAboutInfo { get; set; }
     public TerminalGptOptions Value => this;
 }
 

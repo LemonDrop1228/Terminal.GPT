@@ -8,6 +8,7 @@ using TerminalGPT.Options;
 using Spectre.Console.Rendering;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using OpenAI.Chat;
 using TerminalGPT.Data;
 using TerminalGPT.Enums;
 using TerminalGPT.Extensions;
@@ -47,6 +48,9 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
     protected override async Task<ExitCode.Code> Run()
     {
+        if(_chatService.CurrentThread == null)
+            await _chatService.CreateNewThread();
+        
         DrawHeader();
 
         try
@@ -55,22 +59,24 @@ public class TerminalChatService : BaseService, ITerminalChatService
             {
                 AnsiConsole.Background = Color.DarkBlue;
                 var input = string.Empty;
-                
+
                 // Hide the cursor
                 Console.CursorVisible = false;
                 while (string.IsNullOrWhiteSpace(input = await _userInputService.GetInputWithLiveDisplay()))
                 {
                     await Task.Delay(1);
                 }
+
                 // Show the cursor
                 Console.CursorVisible = true;
 
                 if (_commandService.TryParseCommand(input, out var command))
                 {
                     await _commandService.ExecuteCommand(command);
-                    if (command.CommandEnum != CommandEnum.Command.NotImplemented && command.CommandEnum != CommandEnum.Command.Unknown)
+                    if (command.CommandEnum != CommandEnum.Command.NotImplemented &&
+                        command.CommandEnum != CommandEnum.Command.Unknown)
                         DrawCommand(command);
-                    
+
                     if (command.CommandEnum == CommandEnum.Command.Exit)
                     {
                         return ExitCode.Code.CleanExit;
@@ -110,26 +116,63 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
     private void DrawCommand(ChatCommand command)
     {
-        AddItemToDisplay(command.CommandEnum.GetDescription(), $"Command::[gold3][bold]{command.CommandEnum.ToString()}[/][/] - {DateTime.Now}", true);
+        AddItemToDisplay(command.CommandEnum.GetDescription(),
+            $"Command::[gold3][bold]{command.CommandEnum.ToString()}[/][/] - {DateTime.Now}", true);
     }
 
     public void DrawHeader()
     {
-        AnsiConsole.Write(new FigletText(
-                FigletFont.Parse(AppConstants.FigletFont),
-                "T e r m i n a l . G P T")
-            .Centered()
-            .Color(Color.Aquamarine3)
-        );
+        var title = $"( ::[orange1][bold]Title: {_chatService.CurrentThread.Title} | Messages: {_chatService?.CurrentThread?.Messages?.Where(m => m.Message.Role != Role.System).Count() ?? 0}[/][/]:: )";
+        
+        try
+        {
+            AnsiConsole.Write(new FigletText(
+                    FigletFont.Parse(AppConstants.FigletFont),
+                    "T e r m i n a l . G P T")
+                .Centered()
+                .Color(Color.Aquamarine3)
+            );
 
-        AnsiConsole.Render(
-            new Table().Border(TableBorder.Rounded)
-                .AddColumn("Version")
-                .AddColumn("GitHub Repo")
-                .AddRow("[red][bold]1.0.0[/][/]",
-                    "[blue][link=https://github.com/LemonDrop1228/Terminal.GPT]https://github.com/LemonDrop1228/Terminal.GPT[/][/]")
-                .Centered());
-        AnsiConsole.Render(new Rule());
+            if (_options.ShowAboutInfo)
+                AnsiConsole.Render(
+                    new Table().Border(TableBorder.Rounded)
+                        .AddColumn("Version")
+                        .AddColumn("GitHub Repo")
+                        .AddRow("[red][bold]1.0.0[/][/]",
+                            "[blue][link=https://github.com/LemonDrop1228/Terminal.GPT]https://github.com/LemonDrop1228/Terminal.GPT[/][/]")
+                        .Centered());
+
+            AnsiConsole.Render(_options.ShowChatTitle ? new Rule(title) : new Rule());
+            
+            if (_options.ShowSystemPrompt)
+                AnsiConsole.Render(new Panel(new Markup(
+                            $"[dim]{ExtractSystemPromptMessageContent()}[/]").Justify(Justify.Center)
+                        .Centered())
+                    .Header($"( ::[cornsilk1][bold]system prompt[/][/]:: )")
+                    .HeaderAlignment(Justify.Center)
+                    .Border(BoxBorder.Rounded)
+                    .BorderColor(Color.DarkGoldenrod)
+                    .Expand()
+                    .RoundedBorder()
+                );
+
+            string ExtractSystemPromptMessageContent()
+            {
+                return _chatService
+                           ?.CurrentThread
+                           ?.Messages
+                           ?.FirstOrDefault(x => x.Message.Role == Role.System)
+                           ?.Message
+                           ?.Content
+                       ?? _options.SystemPrompt ?? AppConstants.DefaultSystemPromptMessage
+                    ;
+            }
+        }
+        catch (Exception e)
+        {
+            AnsiConsole.WriteException(e);
+            throw;
+        }
     }
 
     public void AddItemToDisplay(string content, string header, bool isUser = false)
@@ -146,7 +189,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 ? $"[green][bold]{header}[/][/]"
                 : $"[cyan][bold]{header}[/][/]"));
         }
-        
+
         items.Add(new Rule().RuleStyle(Style.Parse("cyan")));
         DrawItems();
     }
@@ -183,11 +226,11 @@ public class TerminalChatService : BaseService, ITerminalChatService
                     CommandEnum.Command.NotImplemented => "[red][bold] Command not yet implemented [/][/]",
                     _ => "[red][bold] Command not supported [/][/]"
                 }, async spinnerCtx =>
-            {
-                spinnerCtx.Spinner = Spinner.Known.Star2;
-                spinnerCtx.SpinnerStyle = Style.Parse("Yellow");
-                spinnerCtx.Refresh();
-                Task.Delay(1500).Wait();
-            });
+                {
+                    spinnerCtx.Spinner = Spinner.Known.Star2;
+                    spinnerCtx.SpinnerStyle = Style.Parse("Yellow");
+                    spinnerCtx.Refresh();
+                    Task.Delay(1500).Wait();
+                });
     }
 }
