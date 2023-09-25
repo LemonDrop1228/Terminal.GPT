@@ -12,6 +12,7 @@ class Program
 {
     static async Task Main(string[] args)
     {
+        
         var host = new HostBuilder()
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
@@ -20,6 +21,7 @@ class Program
             .ConfigureServices((hostContext, services) =>
             {
                 services.Configure<TerminalGptOptions>(hostContext.Configuration.GetSection("Options"));
+                services.AddSingleton<IUserInputService, UserInputService>();
                 services.AddSingleton<IChatCommandService, ChatCommandService>();
                 services.AddSingleton<IExitService, ExitService>();
                 services.AddSingleton<IOpenAIClientFactory, OpenAIClientFactory>();
@@ -58,6 +60,7 @@ class Program
                     eventArgs.Cancel = true;
                     Environment.Exit(0);
                 };
+                
                 
                 await mainService.Run();
             }

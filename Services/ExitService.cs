@@ -24,6 +24,6 @@ public class ExitService : IExitService
         {
             await service.Stop();
         }
-        return ExitCode.Code.Success;
+        return ExitCode.Code.CleanExit;
     }
 }
