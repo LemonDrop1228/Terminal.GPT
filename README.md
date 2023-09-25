@@ -12,11 +12,25 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 - **Simple Installation**: Installation is automated via a PowerShell script that downloads the latest release and sets up the application for you.
 - **More**: More features are planned for the future. See the 'Roadmap' section for more details.
 
+
+## Acknowledgments
+
+<details open>
+<summary>Click to expand!</summary>
+  <p>
+  - [OpenAI](https://github.com/openai) for their incredible GPT-3 model and API.
+  - The .NET community for providing a powerful platform and useful libraries.
+  - [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) for its high-performance JSON framework.
+  - [ OpenAI-API-dotnet](https://github.com/OkGoDoIt/OpenAI-API-dotnet) for the official .NET client library for the OpenAI API.
+  - [Spectre.Console](https://github.com/spectreconsole/spectre.console) for enabling the creation of beautiful console applications.
+  </p>
+</details>
+
 ## Installation
 
 The installation process for `Terminal.GPT` is automated via a `PowerShell script` that sits at the root of the repository. Here is the step-by-step process:
 
-1. Open `PowerShell` as an **Administrator**.
+1. Open `PowerShell` as an **Administrator**.⚠️IMPORTANT⚠️
 
 2. Run the following command to allow the execution of scripts:
 
@@ -132,13 +146,6 @@ We welcome contributions from the community. To contribute:
 
 This project is licensed under the GNU General Public License v3.0. This license allows you the freedom to use, modify, and distribute the software, but you must ensure the same freedoms for others when distributing your versions. See the `LICENSE` file for more details.
 
-## Acknowledgments
-
-- [OpenAI](https://github.com/openai) for their incredible GPT-3 model and API.
-- The .NET community for providing a powerful platform and useful libraries.
-- [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) for its high-performance JSON framework.
-- [ OpenAI-API-dotnet](https://github.com/OkGoDoIt/OpenAI-API-dotnet) for the official .NET client library for the OpenAI API.
-- [Spectre.Console](https://github.com/spectreconsole/spectre.console) for enabling the creation of beautiful console applications.
 
 ## Donation
 
