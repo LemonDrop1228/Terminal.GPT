@@ -41,12 +41,10 @@ namespace TerminalGPT.Services
                     ExitCode.Code main = ServiceMode.Value switch
                     {
                         ServiceMode.Mode.Chat => await _terminalChatService.Start(),
-                        /*ServiceMode.Mode.Help => await _terminalChatService.RunHelp(),*/
                         ServiceMode.Mode.Menu => await _menuService.Start(),
                         ServiceMode.Mode.Exit => await _exitService.Exit(),
                         _ => throw new ArgumentOutOfRangeException()
                     };
-                    
                     
                     if (main == ExitCode.Code.CleanExit)
                     {
@@ -60,6 +58,9 @@ namespace TerminalGPT.Services
                         Console.ReadLine();
                         ServiceMode.Set(ServiceMode.Mode.Exit);
                     }
+                    
+                    if(ServiceMode.Value == ServiceMode.Mode.Exit)
+                        break;
                     
                     ServiceMode.Set
                     (

@@ -27,17 +27,20 @@ public class TerminalChatService : BaseService, ITerminalChatService
     private readonly TerminalGptOptions _options;
     private List<IRenderable> items;
     private readonly IChatCommandService _commandService;
+    private readonly IUserInputService _userInputService;
 
     public TerminalChatService(
         IChatService chatService,
         IOpenAIService openAiService,
         IChatCommandService commandService,
-        IOptions<TerminalGptOptions> options
+        IOptions<TerminalGptOptions> options,
+        IUserInputService userInputService
     )
     {
         _chatService = chatService;
         _openAiService = openAiService;
         _commandService = commandService;
+        _userInputService = userInputService;
         _options = options.Value;
         items = new List<IRenderable>();
     }
@@ -52,15 +55,25 @@ public class TerminalChatService : BaseService, ITerminalChatService
             {
                 AnsiConsole.Background = Color.DarkBlue;
                 var input = string.Empty;
-                while (string.IsNullOrWhiteSpace(input = AnsiConsole.Ask<string>($"[green][bold]{Environment.UserName}[/][/]")))
+                
+                
+                // Hide the cursor
+                Console.CursorVisible = false;
+                while (string.IsNullOrWhiteSpace(input = await _userInputService.GetInputWithLiveDisplay()))
                 {
-                    await Task.Delay(1000);
+                    await Task.Delay(1);
                 }
+                // Show the cursor
+                Console.CursorVisible = true;
 
                 if (_commandService.TryParseCommand(input, out var command))
                 {
                     await _commandService.ExecuteCommand(command);
                     DrawCommand(command);
+                    if (command.CommandEnum == CommandEnum.Command.Exit)
+                    {
+                        return ExitCode.Code.CleanExit;
+                    }
                 }
                 else
                 {
@@ -120,8 +133,6 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
     public void AddItemToDisplay(string content, string header, bool isUser = false)
     {
-        
-        
         try
         {
             items.Add(new Panel($"{content}").Header(isUser
@@ -135,14 +146,12 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 : $"[cyan][bold]{header}[/][/]"));
         }
         
-        
         items.Add(new Rule().RuleStyle(Style.Parse("cyan")));
         DrawItems();
     }
 
     private string ScrubMarkup(string content)
     {
-        // Use regex to remove any spectre.console markup from the content
         var regex = new Regex(@"\[(.*?)\]");
         content = regex.Replace(content, "");
         return content;
@@ -166,7 +175,6 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
     public async Task PrintCommandNotImplemented()
     {
-        // Asynchronously write a message to the console that the command is not implemented
         await AnsiConsole.Status().Spinner(Spinner.Known.Star)
             .StartAsync("[red][bold]Command not implemented[/][/]", async spinnerCtx =>
             {
