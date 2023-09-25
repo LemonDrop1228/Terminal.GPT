@@ -56,7 +56,7 @@ public class ChatCommandService : IChatCommandService
             {
                 CommandEnum.Command.Exit => async () => await ExitService.Exit(),
                 CommandEnum.Command.Save => async () => await ChatService.Save(),
-                _ => async () => TerminalChatService.PrintCommandNotImplemented()
+                _ => async () => TerminalChatService.PrintCommandNotImplemented(command)
             });
         }
     }
@@ -76,7 +76,12 @@ public class ChatCommandService : IChatCommandService
 
         var commandString = input.Split(' ')[0].Substring(1);
         var commandEnum = Enum.TryParse<CommandEnum.Command>(commandString, true, out var commandEnumResult)
-            ? commandEnumResult
+            ? commandEnumResult switch
+            {
+                CommandEnum.Command.Exit => CommandEnum.Command.Exit,
+                CommandEnum.Command.Save => CommandEnum.Command.Save,
+                _ => CommandEnum.Command.NotImplemented
+            }
             : CommandEnum.Command.Unknown;
         command = new ChatCommand(commandEnum);
         

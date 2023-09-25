@@ -17,7 +17,7 @@ namespace TerminalGPT.Services;
 public interface ITerminalChatService : IBaseService
 {
     Task Help();
-    Task PrintCommandNotImplemented();
+    Task PrintCommandNotImplemented(CommandEnum.Command command);
 }
 
 public class TerminalChatService : BaseService, ITerminalChatService
@@ -56,7 +56,6 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 AnsiConsole.Background = Color.DarkBlue;
                 var input = string.Empty;
                 
-                
                 // Hide the cursor
                 Console.CursorVisible = false;
                 while (string.IsNullOrWhiteSpace(input = await _userInputService.GetInputWithLiveDisplay()))
@@ -69,7 +68,9 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 if (_commandService.TryParseCommand(input, out var command))
                 {
                     await _commandService.ExecuteCommand(command);
-                    DrawCommand(command);
+                    if (command.CommandEnum != CommandEnum.Command.NotImplemented && command.CommandEnum != CommandEnum.Command.Unknown)
+                        DrawCommand(command);
+                    
                     if (command.CommandEnum == CommandEnum.Command.Exit)
                     {
                         return ExitCode.Code.CleanExit;
@@ -173,15 +174,20 @@ public class TerminalChatService : BaseService, ITerminalChatService
         throw new NotImplementedException();
     }
 
-    public async Task PrintCommandNotImplemented()
+    public async Task PrintCommandNotImplemented(CommandEnum.Command command)
     {
         await AnsiConsole.Status().Spinner(Spinner.Known.Star)
-            .StartAsync("[red][bold]Command not implemented[/][/]", async spinnerCtx =>
+            .StartAsync(
+                command switch
+                {
+                    CommandEnum.Command.NotImplemented => "[red][bold] Command not yet implemented [/][/]",
+                    _ => "[red][bold] Command not supported [/][/]"
+                }, async spinnerCtx =>
             {
                 spinnerCtx.Spinner = Spinner.Known.Star2;
                 spinnerCtx.SpinnerStyle = Style.Parse("Yellow");
                 spinnerCtx.Refresh();
-                Task.Delay(1000).Wait();
+                Task.Delay(1500).Wait();
             });
     }
 }
