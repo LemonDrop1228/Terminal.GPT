@@ -139,18 +139,26 @@ public class UserInputService : IUserInputService
     {
         var caret = (showCursor ? "[bold][red]_[/][/]" : "[grey]_[/]");
         var markupText = " ";
+        bool isCommand = false;
+        
         if (input1 is not null)
         {
             var markupInput = input1.Substring(0, cursorPosition) +
                               input1.Substring(cursorPosition);
-            markupText = (markupInput.StartsWith("/") && !markupInput.Contains(" "))
-                ? $"[yellow]/[/][purple]{markupInput[1..]}[/]"
-                : markupInput;
+            if (markupInput.StartsWith("/"))
+            {
+                markupText = $"[yellow]/[/][purple]{markupInput[1..]}[/]";
+                isCommand = true;
+            }
+            else
+            {
+                markupText = markupInput;
+            }
         }
         else
             markupText = $" ";
 
-        return new Panel(new Markup($"{Markup.Escape(markupText)}{caret}"))
+        return new Panel(new Markup(isCommand ? $"{markupText}{caret}" : $"{Markup.Escape(markupText)}{caret}"))
             .Header(header)
             .Border(BoxBorder.Ascii)
             .HeaderAlignment(Justify.Center)
