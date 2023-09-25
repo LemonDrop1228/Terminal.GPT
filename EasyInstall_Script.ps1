@@ -1,14 +1,18 @@
 # Function to generate the command to be added
 function addPathToEnvironmentVariableCommand ($appPath) {
-    $messageBody = @"
-To add TerminalGPT.exe's root path to the system environment variables, please copy and paste the following command into your PowerShell:
+    if (!(Test-Path $appPath)) {
+        Write-Host "App path '$appPath' does not exist. Exiting script."
+        return
+    }
 
-    [Environment]::SetEnvironmentVariable('PATH',`$ENV:Path+';'+'$appPath',[System.EnvironmentVariableTarget]::User)
-
-This command adds TerminalGPT into the PATH system environment variables, allowing you to easily run TerminalGPT from any command prompt or PowerShell session without specifying the full path to TerminalGPT.exe.
-"@
+    $messageBody = @"To add TerminalGPT.exe's root path to the system environment variables, please copy and paste the following command into your PowerShell:
+        [Environment]::SetEnvironmentVariable('PATH','$ENV:Path+';'+'$appPath',[System.EnvironmentVariableTarget]::User)
+    This command adds TerminalGPT into the PATH system environment variables, allowing you to easily run TerminalGPT from any command prompt or PowerShell session without specifying the full path to TerminalGPT.exe.
+    "@
+    
     Write-Host $messageBody
 }
+
 
 # Initialize WebClient
 $client = New-Object System.Net.WebClient
@@ -19,22 +23,27 @@ $file = "$env:TEMP\Terminal-GPT.zip"
 
 # Cleanup function
 function cleanupOnError() {
-    # If download started, delete downloaded zip
-    if (Test-Path $file) {
-        Write-Host "Deleting downloaded zip at $file"
-        Remove-Item -Path $file -ErrorAction SilentlyContinue -Force
-    }
+    try {
+        # If download started, delete downloaded zip
+        if (Test-Path $file) {
+            Write-Host "Deleting downloaded zip at $file"
+            Remove-Item -Path $file -ErrorAction SilentlyContinue -Force
+        }
 
-    # If unzip started, delete unzipped files
-    if (Test-Path $destination) {
-        Write-Host "Deleting Unzipped files from $destination"
-        Remove-Item -Path $destination -Recurse -ErrorAction SilentlyContinue
-    }
+        # If unzip started, delete unzipped files
+        if (Test-Path $destination) {
+            Write-Host "Deleting Unzipped files from $destination"
+            Remove-Item -Path $destination -Recurse -ErrorAction SilentlyContinue
+        }
 
-    # If shortcut was created, delete it
-    if (Test-Path $shortcutLocation) {
-        Write-Host "Deleting Shortcut at $shortcutLocation"
-        Remove-Item -Path $shortcutLocation -ErrorAction SilentlyContinue
+        # If shortcut was created, delete it
+        if (Test-Path $shortcutLocation) {
+            Write-Host "Deleting Shortcut at $shortcutLocation"
+            Remove-Item -Path $shortcutLocation -ErrorAction SilentlyContinue
+        }
+    }
+    catch {
+        Write-Host "Cleanup failed with the following exception: $_"
     }
 }
 
@@ -80,7 +89,7 @@ catch {
 }
 
 Remove-Item -Path $file
-$shortcutLocation = "$env:USERPROFILE\Desktop\TerminalGPT.lnk"
+    $shortcutLocation = "$env:USERPROFILE\Desktop\TerminalGPT.lnk"
 
 Write-Host "`nShortcut creation process will now start"
 if(Test-Path -Path $shortcutLocation) {
@@ -108,3 +117,4 @@ catch {
 # Final message
 Write-Host "`nInstallation completed! A shortcut to TerminalGPT has been created on your Desktop."
 addPathToEnvironmentVariableCommand($destination)
+Write-Host "`nPress any key to exit the script."
