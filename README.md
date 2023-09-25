@@ -25,7 +25,7 @@ Set-ExecutionPolicy Bypass -Scope Process -Force;
 3. Download and run the installation script using the following command:
 
 ```powershell
-Invoke-Expression -Command ((Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/LemonDrop1228/Terminal.GPT/main/EasyInstall_Script.ps1' -UseBasicParsing).Content)
+Invoke-Expression (Invoke-WebRequest -Uri https://raw.githubusercontent.com/LemonDrop1228/Terminal.GPT/main/EasyInstall_Script.ps1 -UseBasicParsing).Content
 ```
  > this downloads the latest easy install script bypassing cached versions, and executes the interactive installation session
 
