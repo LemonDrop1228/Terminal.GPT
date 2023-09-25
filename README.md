@@ -9,13 +9,53 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 - **OpenAI Integration**: Uses the official OpenAI-DotNet client library for seamless interaction with the ChatGPT model.
 - **Customizable Settings**: Configuration settings can be easily adjusted in the `appsettings.json` file.
 
+## Roadmap
+
+- [x] Basic terminal interface
+- [x] OpenAI API integration
+- [x] Basic chat functionality
+- [x] Command system
+  - [x] Save command - saves the current conversation to a file
+  - [x] Exit command - exits the application 
+  - [ ] Help command - displays a list of available commands
+  - [ ] Load command - loads a conversation from a file
+  - [ ] Settings command - displays a list of available settings
+  - [ ] Set command - sets a specified setting to a specified value
+  - [ ] Menu command - displays a list of available menus
+  - [ ] SetThread command - sets the current thread to a specified thread
+  - [ ] ListThreads command - displays a list of available threads
+  - [ ] CreateThread command - creates a new thread
+  - [ ] DeleteThread command - deletes a specified thread
+  - [ ] RenameThread command - renames a specified thread
+  - [ ] SaveAs command - saves the current conversation to a specified file using a file dialog
+  - [ ] LoadLast command - loads the last conversation from a file
+  - [ ] About command - displays information about the application
+  - [ ] Macros command - displays a list of available macros
+  - [ ] Macro command - executes a specified macro
+- [x] Customizable settings
+- [x] Customizable system prompts
+- [ ] Customizable temperature
+- [ ] Streaming output
+- [ ] Custom themes
+- [ ] Fluent menu system
+- [ ] Customizable menus
+- [ ] Customizable macros
+- [ ] Shell integration (Windows)
+- [ ] Shell integration (Linux)
+- [ ] Shell integration (macOS)
+
+
 ## Previews
+<details>
+<summary>Click to expand!</summary>
 
 Here are some previews of the terminal client in action:
 
 ![Preview1](./Previews/TStsAkJpj5.png)
 ![Preview1.5](./Previews/83E4p5zLqf.gif)
 ![Preview2](./Previews/7iTF6ZAxlY.png)
+
+</details>
 
 ## Getting Started
 

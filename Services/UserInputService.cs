@@ -13,11 +13,10 @@ public interface IUserInputService
 public class UserInputService : IUserInputService
 {
     private const int _maxCursorFrames = 48;
-    private int _cursorPosition = 0;
 
     public async Task<string> GetInputWithLiveDisplay()
     {
-        _cursorPosition = 0;
+        var cursorPosition = 0;
         var prompt = $"( [green][bold]{Environment.UserName}'s input )[/][/]";
         var input = new List<char>();
         var renderable = GetPanel(header: prompt);
@@ -46,58 +45,58 @@ public class UserInputService : IUserInputService
                             switch (key.Key)
                             {
                                 case ConsoleKey.PageDown:
-                                    input.Insert(_cursorPosition, '\n');
-                                    _cursorPosition++;
+                                    input.Insert(cursorPosition, '\n');
+                                    cursorPosition++;
                                     break;
                                 case ConsoleKey.Enter:
                                     cancellationTokenSource.Cancel();
                                     return new string(input.ToArray());
                                 case ConsoleKey.Backspace:
-                                    if (_cursorPosition > 0)
+                                    if (cursorPosition > 0)
                                     {
-                                        _cursorPosition--;
-                                        input.RemoveAt(_cursorPosition);
+                                        cursorPosition--;
+                                        input.RemoveAt(cursorPosition);
                                     }
 
                                     break;
                                 case ConsoleKey.Delete:
-                                    if (_cursorPosition < input.Count)
+                                    if (cursorPosition < input.Count)
                                     {
-                                        input.RemoveAt(_cursorPosition);
+                                        input.RemoveAt(cursorPosition);
                                     }
 
                                     break;
                                 case ConsoleKey.Escape:
-                                    input.InsertRange(_cursorPosition, "/Exit".ToCharArray());
-                                    _cursorPosition += 5;
+                                    input.InsertRange(cursorPosition, "/Exit".ToCharArray());
+                                    cursorPosition += 5;
                                     break;
                                 case ConsoleKey.Tab:
-                                    input.InsertRange(_cursorPosition, "    ".ToCharArray());
-                                    _cursorPosition += 4;
+                                    input.InsertRange(cursorPosition, "    ".ToCharArray());
+                                    cursorPosition += 4;
                                     break;
                                 case ConsoleKey.Home:
-                                    _cursorPosition = 0;
+                                    cursorPosition = 0;
                                     break;
                                 case ConsoleKey.End:
-                                    _cursorPosition = input.Count;
+                                    cursorPosition = input.Count;
                                     break;
                                 case ConsoleKey.LeftArrow:
                                     if (key.Modifiers == ConsoleModifiers.Control)
-                                        _cursorPosition = MoveBackToWordBoundary(input, _cursorPosition);
+                                        cursorPosition = MoveBackToWordBoundary(input, cursorPosition);
                                     else
-                                        _cursorPosition = Math.Max(0, _cursorPosition - 1);
+                                        cursorPosition = Math.Max(0, cursorPosition - 1);
                                     break;
                                 case ConsoleKey.RightArrow:
                                     if (key.Modifiers == ConsoleModifiers.Control)
-                                        _cursorPosition = MoveForwardToWordBoundary(input, _cursorPosition);
+                                        cursorPosition = MoveForwardToWordBoundary(input, cursorPosition);
                                     else
-                                        _cursorPosition = Math.Min(input.Count, _cursorPosition + 1);
+                                        cursorPosition = Math.Min(input.Count, cursorPosition + 1);
                                     break;
                                 default:
                                     if (!char.IsControl(key.KeyChar))
                                     {
-                                        input.Insert(_cursorPosition, key.KeyChar);
-                                        _cursorPosition++;
+                                        input.Insert(cursorPosition, key.KeyChar);
+                                        cursorPosition++;
                                     }
 
                                     break;
@@ -110,7 +109,7 @@ public class UserInputService : IUserInputService
                         }
 
                         ctx.UpdateTarget(GetPanel(prompt, input.Count > 0 ? new string(input.ToArray()) : null,
-                            _cursorPosition,
+                            cursorPosition,
                             (manualCursorFrames <= visibleFrames ? true : false)));
                         ctx.Refresh();
                         await Task.Delay(1, token);
