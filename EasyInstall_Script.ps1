@@ -14,7 +14,7 @@ This command adds TerminalGPT into the PATH system environment variables, allowi
 $client = New-Object System.Net.WebClient
 
 # URL and file path setting
-$url = 'https://github.com/LemonDrop1228/TerminalGPT/releases/latest/download/Terminal-GPT.zip'
+$url = 'https://github.com/LemonDrop1228/Terminal.GPT/releases/latest/download/Terminal-GPT.zip'
 $file = "$env:TEMP\Terminal-GPT.zip"
 
 # Cleanup function
