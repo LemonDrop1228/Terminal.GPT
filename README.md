@@ -17,13 +17,12 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 
 <details open>
 <summary>Click to expand!</summary>
-  <p>
+
   - [OpenAI](https://github.com/openai) for their incredible GPT-3 model and API.
   - The .NET community for providing a powerful platform and useful libraries.
   - [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) for its high-performance JSON framework.
   - [ OpenAI-API-dotnet](https://github.com/OkGoDoIt/OpenAI-API-dotnet) for the official .NET client library for the OpenAI API.
   - [Spectre.Console](https://github.com/spectreconsole/spectre.console) for enabling the creation of beautiful console applications.
-  </p>
 </details>
 
 ## Installation
