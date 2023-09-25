@@ -48,10 +48,13 @@ public class UserInputService : IUserInputService
                                 return input;
                             case ConsoleKey.Backspace:
                                 if (input.Length > 0)
-                                {
                                     input = input.Remove(input.Length - 1);
-                                }
-
+                                break;
+                            case ConsoleKey.Escape:
+                                input = "/Exit";
+                                break;
+                            case ConsoleKey.Tab:
+                                input += "    ";
                                 break;
                             default:
                                 input += key.KeyChar;

@@ -27,7 +27,8 @@ public class CommandEnum
         Save,
         Load,
         History,
-        Unknown
+        Unknown,
+        NotImplemented
     }
     
 }
