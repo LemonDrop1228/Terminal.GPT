@@ -41,6 +41,8 @@ function cleanupOnError() {
 Write-Host "Attempting to download Terminal-GPT.zip from `n$url"
 try {
     $client.DownloadFile($url, $file)
+    # write the downloaded file path to the console
+    Write-Host "`nDownloaded file saved to $file"
     Write-Host "`nDownload Successful. Press any key to proceed to the next step."
     pause
 }
