@@ -64,23 +64,23 @@ catch {
     cleanupOnError
     exit
 }
-
 $shell = New-Object -ComObject shell.application
 $zip = $shell.NameSpace($file)
 $destination = "$env:LOCALAPPDATA\TerminalGPT"
-# if the destination folder doesn't exist, create it
-if(!(Test-Path $destination)) {
-    Write-Host "`nCreating destination folder at $destination"
-    New-Item -Path $destination -ItemType Directory
+
+# if the destination folder exists, remove it
+if(Test-Path $destination) {
+    Write-Host "`nRemoving any previous files at $destination"
+    Remove-Item -Path $destination -Recurs
 }
+
+# create destination folder 
+Write-Host "`nCreating destination folder at $destination"
+New-Item -Path $destination -ItemType Directory
 
 Write-Host "`nProcess to unzip and move the files will now start"
 # write the destination path to the console
 Write-Host "`nUnzipping files to $destination"
-if(Test-Path $destination) {
-    Write-Host "`nRemoving any previous files at $destination"
-    Remove-Item -Path $destination -Recurse
-}
 
 try {
     foreach($item in $zip.items()){
