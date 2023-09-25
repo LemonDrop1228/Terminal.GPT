@@ -68,6 +68,11 @@ catch {
 $shell = New-Object -ComObject shell.application
 $zip = $shell.NameSpace($file)
 $destination = "$env:LOCALAPPDATA\TerminalGPT"
+# if the destination folder doesn't exist, create it
+if(!(Test-Path $destination)) {
+    Write-Host "`nCreating destination folder at $destination"
+    New-Item -Path $destination -ItemType Directory
+}
 
 Write-Host "`nProcess to unzip and move the files will now start"
 # write the destination path to the console
