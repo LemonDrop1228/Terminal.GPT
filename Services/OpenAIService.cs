@@ -41,6 +41,7 @@ public class OpenAiService : IOpenAIService
         _options = options.Value;
     }
     
+    // TODO: refactor this to yield return the response message instead of using an event that way the response can be streamed to the console as it comes in
     public async Task GetModelResponse(ChatThread thread)
     {
         var messages = thread.Messages.Select(message => message.Message).ToList();
@@ -50,7 +51,6 @@ public class OpenAiService : IOpenAIService
         var chatRequest = new ChatRequest(messages, thread.ModelId, number: 1);
         await _openAIClientFactory.Client.ChatEndpoint.StreamCompletionAsync(chatRequest, result =>
         {
-            // refactor of foreach loop above to use LINQ
             var response = result.Choices.FirstOrDefault(choice => !string.IsNullOrWhiteSpace(choice.Message?.Content));
             if (response != null)
             {

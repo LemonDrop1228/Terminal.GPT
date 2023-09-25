@@ -189,7 +189,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 ? $"[green][bold]{header}[/][/]"
                 : $"[cyan][bold]{header}[/][/]"));
         }
-
+        
         items.Add(new Rule().RuleStyle(Style.Parse("cyan")));
         DrawItems();
     }
