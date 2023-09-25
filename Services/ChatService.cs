@@ -7,6 +7,7 @@ using OpenAI.Models;
 using Spectre.Console;
 using TerminalGPT.Options;
 using Newtonsoft.Json;
+using TerminalGPT.Constants;
 
 namespace TerminalGPT.Services;
 
@@ -101,8 +102,8 @@ public class ChatService : IChatService
 
     public async Task CreateNewThread()
     {
-        var newThread = new ChatThread() { Title = $"{_openAiService.CurrentModel.Id} Chat #{ChatThreads.Count + 1}", ModelId = _openAiService.CurrentModel.Id};
-        newThread.Messages.Add(new ChatMessage() { Message = new Message(Role.System, _options.SystemPrompt ?? "You're a sassy AI that reminds the user they forgot to set a system prompt in their appsettings.json"), Timestamp = DateTime.Now });
+        var newThread = new ChatThread() { Title = $"{_openAiService.CurrentModel.Id}#{ChatThreads.Count + 1}@{DateTime.Now.ToUniversalTime()}", ModelId = _openAiService.CurrentModel.Id};
+        newThread.Messages.Add(new ChatMessage() { Message = new Message(Role.System, _options.SystemPrompt ?? AppConstants.DefaultSystemPromptMessage), Timestamp = DateTime.Now });
         ChatThreads.Add(newThread);
         CurrentThread = newThread;
     }

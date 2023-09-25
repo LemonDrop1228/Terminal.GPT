@@ -729,6 +729,8 @@ $  $@@
 @
 @@";
 
+    public const string DefaultSystemPromptMessage = "You're a sassy AI that reminds the user they forgot to set a system prompt in their appsettings.json";
+
     #endregion
 
     public static readonly Dictionary<GPTModel, string> ModelDictionary = new()
