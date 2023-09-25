@@ -5,10 +5,12 @@ function addPathToEnvironmentVariableCommand ($appPath) {
         return
     }
 
-    $messageBody = @"To add TerminalGPT.exe's root path to the system environment variables, please copy and paste the following command into your PowerShell:
+    $messageBody = @"
+To add TerminalGPT.exe's root path to the system environment variables, please copy and paste the following command into your PowerShell:
         [Environment]::SetEnvironmentVariable('PATH','$ENV:Path+';'+'$appPath',[System.EnvironmentVariableTarget]::User)
     This command adds TerminalGPT into the PATH system environment variables, allowing you to easily run TerminalGPT from any command prompt or PowerShell session without specifying the full path to TerminalGPT.exe.
-    "@
+    
+"@
     
     Write-Host $messageBody
 }
