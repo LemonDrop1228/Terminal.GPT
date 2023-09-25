@@ -17,6 +17,7 @@ public class UserInputService : IUserInputService
 
     public async Task<string> GetInputWithLiveDisplay()
     {
+        _cursorPosition = 0;
         var prompt = $"( [green][bold]{Environment.UserName}'s input )[/][/]";
         var input = new List<char>();
         var renderable = GetPanel(header: prompt);
@@ -26,95 +27,107 @@ public class UserInputService : IUserInputService
             .Overflow(VerticalOverflow.Visible)
             .StartAsync(async ctx =>
             {
-                ctx.Refresh();
-
-                var cancellationTokenSource = new CancellationTokenSource();
-                var token = cancellationTokenSource.Token;
-                var keyTask = Task.Run(() => { return Console.ReadKey(true); }, token);
-                var manualCursorFrames = _maxCursorFrames;
-                var visibleFrames = 24;
-
-                while (true)
+                try
                 {
-                    if (keyTask.IsCompletedSuccessfully)
-                    {
-                        var key = keyTask.Result;
+                    ctx.Refresh();
 
-                        switch (key.Key)
+                    var cancellationTokenSource = new CancellationTokenSource();
+                    var token = cancellationTokenSource.Token;
+                    var keyTask = Task.Run(() => { return Console.ReadKey(true); }, token);
+                    var manualCursorFrames = _maxCursorFrames;
+                    var visibleFrames = 24;
+
+                    while (true)
+                    {
+                        if (keyTask.IsCompletedSuccessfully)
                         {
-                            case ConsoleKey.PageDown:
-                                input.Insert(_cursorPosition, '\n');
-                                _cursorPosition++;
-                                break;
-                            case ConsoleKey.Enter:
-                                return new string(input.ToArray());
-                            case ConsoleKey.Backspace:
-                                if (_cursorPosition > 0)
-                                {
-                                    _cursorPosition--;
-                                    input.RemoveAt(_cursorPosition);
-                                }
-                                break;
-                            case ConsoleKey.Delete:
-                                if (_cursorPosition < input.Count)
-                                {
-                                    input.RemoveAt(_cursorPosition);
-                                }
-                                break;
-                            case ConsoleKey.Escape:
-                                input.InsertRange(_cursorPosition, "/Exit".ToCharArray());
-                                _cursorPosition += 5;
-                                break;
-                            case ConsoleKey.Tab:
-                                input.InsertRange(_cursorPosition, "    ".ToCharArray());
-                                _cursorPosition += 4;
-                                break;
-                            case ConsoleKey.Home:
-                                _cursorPosition = 0;
-                                break;
-                            case ConsoleKey.End:
-                                _cursorPosition = input.Count;
-                                break;
-                            case ConsoleKey.LeftArrow:
-                                if (key.Modifiers == ConsoleModifiers.Control)
-                                    _cursorPosition = MoveBackToWordBoundary(input, _cursorPosition);
-                                else
-                                    _cursorPosition = Math.Max(0, _cursorPosition - 1);
-                                break;
-                            case ConsoleKey.RightArrow:
-                                if (key.Modifiers == ConsoleModifiers.Control)
-                                    _cursorPosition = MoveForwardToWordBoundary(input, _cursorPosition);
-                                else
-                                    _cursorPosition = Math.Min(input.Count, _cursorPosition + 1);
-                                break;
-                            default:
-                                if (!char.IsControl(key.KeyChar))
-                                {
-                                    input.Insert(_cursorPosition, key.KeyChar);
+                            var key = keyTask.Result;
+
+                            switch (key.Key)
+                            {
+                                case ConsoleKey.PageDown:
+                                    input.Insert(_cursorPosition, '\n');
                                     _cursorPosition++;
-                                }
-                                break;
+                                    break;
+                                case ConsoleKey.Enter:
+                                    cancellationTokenSource.Cancel();
+                                    return new string(input.ToArray());
+                                case ConsoleKey.Backspace:
+                                    if (_cursorPosition > 0)
+                                    {
+                                        _cursorPosition--;
+                                        input.RemoveAt(_cursorPosition);
+                                    }
+
+                                    break;
+                                case ConsoleKey.Delete:
+                                    if (_cursorPosition < input.Count)
+                                    {
+                                        input.RemoveAt(_cursorPosition);
+                                    }
+
+                                    break;
+                                case ConsoleKey.Escape:
+                                    input.InsertRange(_cursorPosition, "/Exit".ToCharArray());
+                                    _cursorPosition += 5;
+                                    break;
+                                case ConsoleKey.Tab:
+                                    input.InsertRange(_cursorPosition, "    ".ToCharArray());
+                                    _cursorPosition += 4;
+                                    break;
+                                case ConsoleKey.Home:
+                                    _cursorPosition = 0;
+                                    break;
+                                case ConsoleKey.End:
+                                    _cursorPosition = input.Count;
+                                    break;
+                                case ConsoleKey.LeftArrow:
+                                    if (key.Modifiers == ConsoleModifiers.Control)
+                                        _cursorPosition = MoveBackToWordBoundary(input, _cursorPosition);
+                                    else
+                                        _cursorPosition = Math.Max(0, _cursorPosition - 1);
+                                    break;
+                                case ConsoleKey.RightArrow:
+                                    if (key.Modifiers == ConsoleModifiers.Control)
+                                        _cursorPosition = MoveForwardToWordBoundary(input, _cursorPosition);
+                                    else
+                                        _cursorPosition = Math.Min(input.Count, _cursorPosition + 1);
+                                    break;
+                                default:
+                                    if (!char.IsControl(key.KeyChar))
+                                    {
+                                        input.Insert(_cursorPosition, key.KeyChar);
+                                        _cursorPosition++;
+                                    }
+
+                                    break;
+                            }
+
+
+                            cancellationTokenSource = new CancellationTokenSource();
+                            token = cancellationTokenSource.Token;
+                            keyTask = Task.Run(() => Console.ReadKey(true), token);
                         }
 
+                        ctx.UpdateTarget(GetPanel(prompt, input.Count > 0 ? new string(input.ToArray()) : null,
+                            _cursorPosition,
+                            (manualCursorFrames <= visibleFrames ? true : false)));
+                        ctx.Refresh();
+                        await Task.Delay(1, token);
+                        ctx.Refresh();
 
-                        cancellationTokenSource = new CancellationTokenSource();
-                        token = cancellationTokenSource.Token;
-                        keyTask = Task.Run(() => Console.ReadKey(true), token);
+                        if (manualCursorFrames-- <= 0)
+                            manualCursorFrames = _maxCursorFrames;
                     }
-
-                    ctx.UpdateTarget(GetPanel(prompt, input.Count > 0 ? new string(input.ToArray()) : null,
-                        _cursorPosition,
-                        (manualCursorFrames <= visibleFrames ? true : false)));
-                    ctx.Refresh();
-                    await Task.Delay(1, token);
-                    ctx.Refresh();
-
-                    if (manualCursorFrames-- <= 0)
-                        manualCursorFrames = _maxCursorFrames;
+                }
+                catch (Exception e)
+                {
+                    AnsiConsole.WriteException(e);
+                    throw;
                 }
             });
     }
-    
+
     private int MoveBackToWordBoundary(List<char> input, int currentPosition)
     {
         for (int i = currentPosition - 1; i > 0; i--)
@@ -140,7 +153,7 @@ public class UserInputService : IUserInputService
         var caret = (showCursor ? "[bold][red]_[/][/]" : "[grey]_[/]");
         var markupText = " ";
         bool isCommand = false;
-        
+
         if (input1 is not null)
         {
             var markupInput = input1.Substring(0, cursorPosition) +
@@ -164,7 +177,7 @@ public class UserInputService : IUserInputService
             .HeaderAlignment(Justify.Center)
             .Expand();
     }
-    
+
     private string ScrubMarkup(string content)
     {
         var regex = new Regex(@"\[(.*?)\]");
