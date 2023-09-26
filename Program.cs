@@ -68,6 +68,7 @@ class Program
                                string.IsNullOrEmpty(userEnteredOptions.OrgId) ||
                                userEnteredOptions.Model == null)
                         {
+                            userEnteredOptions = userEnteredOptions.Merge(options);
                             AnsiConsole.Clear();
                             missingOptionsPanel = new Panel(
                                     $"[{(!options.ApiKey.IsNullOrWhiteSpace() ? "lime" : "orange3")}]{{{(!options.ApiKey.IsNullOrWhiteSpace() ? "x" : " ")}}}[/] API KEY: {(!options.ApiKey.IsNullOrWhiteSpace() ? options.ApiKey : "[red][bold]![/][/]")}\n" +
@@ -125,11 +126,12 @@ class Program
                             }
 
                             options.Merge(userEnteredOptions);
+                            if (options.Validate())
+                                break;
                         }
 
                         AnsiConsole.MarkupLine("[lime]Options all set![/]");
                         AnsiConsole.MarkupLine("[yellow]Starting up Terminal.GPT...[/]");
-                        // Write user input to appsettings.json
                         var json = JsonConvert.SerializeObject(options, Formatting.Indented);
 
                         try

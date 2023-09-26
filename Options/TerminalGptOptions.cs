@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace TerminalGPT.Options;
 
@@ -12,6 +13,7 @@ public class TerminalGptOptions : IOptions<TerminalGptOptions>
     public bool ShowChatTitle { get; set; }
     public bool ShowAboutInfo { get; set; }
     public bool WhereArtThouTimmy { get; set; }
+    [JsonIgnore]
     public TerminalGptOptions Value => this;
 
     public TerminalGptOptions Merge(TerminalGptOptions optionsMonitorCurrentValue)
@@ -52,6 +54,14 @@ public class TerminalGptOptions : IOptions<TerminalGptOptions>
         }
 
         return Value;
+    }
+
+    public bool Validate()
+    {
+        if (string.IsNullOrEmpty(ApiKey) | string.IsNullOrEmpty(OrgId) | Model == null)
+            return false;
+
+        return true;
     }
 }
 
