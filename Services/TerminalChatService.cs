@@ -9,9 +9,11 @@ using Spectre.Console.Rendering;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 using OpenAI.Chat;
+using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using TerminalGPT.Data;
 using TerminalGPT.Enums;
 using TerminalGPT.Extensions;
+using TerminalGPT.Constants;
 
 namespace TerminalGPT.Services;
 
@@ -85,9 +87,14 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 else
                 {
                     AddItemToDisplay(input, $"{Environment.UserName} - {DateTime.Now}", true);
-
+                    
+                    // get random number between 0 and 49
+                    var random = new Random();
+                    var randomIndex = random.Next(0, 49);
+                    
+                    
                     await AnsiConsole.Status().Spinner(Spinner.Known.Star)
-                        .StartAsync("[cyan][bold]TerminalGPT[/][/] is thinking...", async spinnerCtx =>
+                        .StartAsync($"[cyan][bold]TerminalGPT[/][/] is thinking... Fact: #{AppConstants.GPT_FACTS[randomIndex]}", async spinnerCtx =>
                         {
                             await _chatService.AddMessageToCurrentThread(input, "User");
 
@@ -114,11 +121,9 @@ public class TerminalChatService : BaseService, ITerminalChatService
         }
     }
 
-    private void DrawCommand(ChatCommand command)
-    {
+    private void DrawCommand(ChatCommand command) =>
         AddItemToDisplay(command.CommandEnum.GetDescription(),
             $"Command::[gold3][bold]{command.CommandEnum.ToString()}[/][/] - {DateTime.Now}", true);
-    }
 
     public void DrawHeader()
     {
@@ -132,6 +137,23 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 .Centered()
                 .Color(Color.Aquamarine3)
             );
+
+            if (_options.WhereArtThouTimmy)
+            {
+                if (File.Exists("RobotImg.png"))
+                {
+                    var image = new CanvasImage("RobotImg.png");
+                    image.Resampler = new BicubicResampler();
+                    image.PixelWidth = 3;
+                    image.MaxWidth = 9;
+                
+                    AnsiConsole.Render(
+                        new Table().Border(TableBorder.Rounded)
+                            .AddColumn("Timmy The Terminal Robot")
+                            .AddRow(image)
+                            .Centered());
+                }
+            }
 
             if (_options.ShowAboutInfo)
                 AnsiConsole.Render(

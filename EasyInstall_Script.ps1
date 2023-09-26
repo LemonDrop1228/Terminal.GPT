@@ -1,85 +1,159 @@
-﻿# Function to generate the command to be added
-function addPathToEnvironmentVariableCommand ($appPath) {
-    $messageBody = @"
-To add TerminalGPT.exe's root path to the system environment variables, please copy and paste the following command into your PowerShell:
-
-    [Environment]::SetEnvironmentVariable("PATH",`$ENV:Path+";$appPath", [System.EnvironmentVariableTarget]::User)
-
-This command adds TerminalGPT into the PATH system environment variables, allowing you to easily run TerminalGPT from any command prompt or PowerShell session without specifying the full path to TerminalGPT.exe.
-"@
-    Write-Output $messageBody
+# Function to update the Path Enviroment Variable
+function addToPathEnvironmentVariable ($appPath) {
+    $Path = [Environment]::GetEnvironmentVariable('Path', [System.EnvironmentVariableTarget]::Machine)
+    if ($Path -notlike "*;$appPath*") {
+        [Environment]::SetEnvironmentVariable('Path', "$Path;$appPath", [System.EnvironmentVariableTarget]::Machine)
+    }
 }
 
-# Initialize WebClient
-$client = New-Object System.Net.WebClient;
+# Initialize HttpClient
+$client = New-Object System.Net.Http.HttpClient
 
 # URL and file path setting
-$url = 'https://github.com/LemonDrop1228/TerminalGPT/releases/latest/download/Terminal-GPT.zip';
-$file = "$env:TEMP\Terminal-GPT.zip";
+$url = 'https://github.com/LemonDrop1228/Terminal.GPT/releases/latest/download/Terminal-GPT.zip'
+$file = "$env:TEMP\Terminal-GPT.zip"
 
 # Cleanup function
 function cleanupOnError() {
-    # If download started, delete downloaded zip
-    if (Test-Path $file) {
-        Write-Output "Deleting downloaded zip at $file"
-        Remove-Item -Path $file -ErrorAction SilentlyContinue -Force
-    }
+    try {
+        # If download started, delete downloaded zip
+        if (Test-Path $file) {
+            Write-Host "Deleting downloaded zip at $file"
+            Remove-Item -Path $file -ErrorAction SilentlyContinue -Force
+        }
 
-    # If unzip started, delete unzipped files
-    if (Test-Path $destination) {
-        Write-Output "Deleting Unzipped files from $destination"
-        Remove-Item -Path $destination -Recurse -ErrorAction SilentlyContinue
-    }
+        # If unzip started, delete unzipped files
+        if (Test-Path $destination) {
+            Write-Host "Deleting Unzipped files from $destination"
+            Remove-Item -Path $destination -Recurse -ErrorAction SilentlyContinue
+        }
 
-    # If shortcut was created, delete it
-    if (Test-Path $shortcutLocation) {
-        Write-Output "Deleting Shortcut at $shortcutLocation"
-        Remove-Item -Path $shortcutLocation -ErrorAction SilentlyContinue
+        # If shortcut was created, delete it
+        if (Test-Path $shortcutLocation) {
+            Write-Host "Deleting Shortcut at $shortcutLocation"
+            Remove-Item -Path $shortcutLocation -ErrorAction SilentlyContinue
+        }
+    }
+    catch {
+        Write-Host "Cleanup failed with the following exception: $_"
     }
 }
 
-
+# Download file with progress tracking
 try {
-    $client.DownloadFile($url, $file);
-} catch {
-    Write-Error "Download failed with the following exception: $_. Please make sure you're connected to the internet."
+    $response = $client.GetAsync($url).Result
+    $response.EnsureSuccessStatusCode()
+
+    $totalLength = $response.Content.Headers.ContentLength
+    $contentStream = [System.IO.File]::Create($file)
+
+    try {
+        $downloadStream = $response.Content.ReadAsStreamAsync().Result
+        $buffer = New-Object Byte[] 8192
+        $progress = @{
+            Id = 1
+            Activity = "Downloading..."
+            Status = "Bytes read"
+            CurrentOperation = $contentStream.Position
+            PercentComplete = 0
+        }
+        $totalRead = $null
+
+        do {
+            $read = $downloadStream.Read($buffer, 0, $buffer.Length)
+            $contentStream.Write($buffer, 0, $read)
+            $totalRead += $read
+            $progress.CurrentOperation = "Downloaded {0:N2} MB of {1:N2} MB" -f ($totalRead / 1MB), ($totalLength / 1MB)
+            $progress.PercentComplete = ($totalRead / $totalLength) * 100
+            Write-Progress @progress
+        } until ($read -eq 0)
+    }
+    finally {
+        $contentStream.Dispose()
+    }
+}
+catch {
+    Write-Host "`nDownload Failed with the following exception: $_. Please make sure you're connected to the internet."
+    Write-Host "Press any key to clean up and exit the script."
+    pause
     cleanupOnError
     exit
 }
 
-$shell = new-object -com shell.application;
-$zip = $shell.NameSpace($file);
+$shell = New-Object -ComObject shell.application
+$zip = $shell.NameSpace($file)
 $destination = "$env:LOCALAPPDATA\TerminalGPT"
 
-if(Test-Path $destination) { Remove-Item -Path $destination -Recurse }
+# if the destination folder exists, remove it
+if(Test-Path $destination) {
+    Write-Host "`nRemoving any previous files at $destination"
+    Remove-Item -Path $destination -Recurse
+}
 
-try {
-    foreach($item in $zip.items()){
-        $shell.Namespace($destination).copyhere($item);
+# create destination folder 
+Write-Host "`nCreating destination folder at $destination"
+New-Item -Path $destination -ItemType Directory
+
+# Extracting files with progress indicator
+$items = $zip.items()
+$totalItems = $items.Count
+$i = 0;
+$progress = @{
+    Activity = "Extracting files..."
+    PercentComplete = 0
+}
+
+foreach($item in $items) {
+    try {
+        $shell.Namespace($destination).copyhere($item)
     }
-} catch {
-    Write-Error "Unzipping failed with the following exception: $_. Please ensure you have necessary privileges."
-    cleanupOnError
-    exit
+    catch {
+        Write-Host "`nFailed to unzip file with the following exception: $_. Please ensure you have necessary privileges."
+        Write-Host "Press any key to clean up and exit the script."
+        pause
+        cleanupOnError
+        exit
+    }
+
+    $i++
+    $progress.PercentComplete = ($i / $totalItems) * 100
+    Write-Progress @progress
 }
 
-Remove-Item -Path $file;
-$shortcutLocation = "$env:USERPROFILE\Desktop\TerminalGPT.lnk";
+Remove-Item -Path $file
+$shortcutLocation = "$env:USERPROFILE\Desktop\TerminalGPT.lnk"
 
-if(Test-Path -Path $shortcutLocation) { Remove-Item -Path $shortcutLocation }
+Write-Host "`nShortcut creation process will now start"
+if(Test-Path -Path $shortcutLocation) {
+    Write-Host "`nRemoving any previous shortcut at $shortcutLocation"
+    Remove-Item -Path $shortcutLocation
+}
 
-$WshShell = New-Object -comObject WScript.Shell;
-$Shortcut = $WshShell.CreateShortcut($shortcutLocation);
-$Shortcut.TargetPath = "$destination\TerminalGPT.exe";
+$WshShell = New-Object -ComObject WScript.Shell
+$Shortcut = $WshShell.CreateShortcut($shortcutLocation)
+$Shortcut.TargetPath = "$destination\TerminalGPT.exe"
 
 try {
-    $Shortcut.Save();
-} catch {
-    Write-Error "Shortcut creation failed with the following exception: $_. Please make sure you're running this script as an Administrator."
+    $Shortcut.Save()
+}
+catch {
+    Write-Host "`nShortcut creation failed with the following exception: $_. Please make sure you're running this script as an Administrator."
+    Write-Host "Press any key to clean up and exit the script."
+    pause
     cleanupOnError
     exit
 }
 
-# Final message
-Write-Output "Installation completed! A shortcut to TerminalGPT has been created on your Desktop."
-addPathToEnvironmentVariableCommand($destination)
+# Installation completion message
+Write-Host "`nInstallation completed! A shortcut to TerminalGPT has been created on your Desktop."
+
+# Ask the user if they want to add the path to the Environment Variables
+$response = Read-Host 'Would you like to add TerminalGPT to system environment variables? (Y/N)'
+if ($response -eq 'Y') {
+    addToPathEnvironmentVariable($destination)
+    Write-Host "`nTerminalGPT added to the system environment variables."
+} else {
+    Write-Host "`nTerminalGPT was not added to the system enironment variables."
+}
+
+Write-Host "`nPress any key to exit the script."

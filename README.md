@@ -8,24 +8,42 @@ This project is an interactive, terminal-based chat client for OpenAI's ChatGPT,
 - **Terminal-based Interaction**: Engage with the ChatGPT model directly from your terminal.
 - **OpenAI Integration**: Uses the official OpenAI-DotNet client library for seamless interaction with the ChatGPT model.
 - **Customizable Settings**: Configuration settings can be easily adjusted in the `appsettings.json` file.
+- **Enhanced input**: Input is enhanced with a custom input system that allows for the use of arrow keys, backspace, and more. (PageDown is used for newlines.)
+- **Simple Installation**: Installation is automated via a PowerShell script that downloads the latest release and sets up the application for you.
+- **More**: More features are planned for the future. See the 'Roadmap' section for more details.
+
+
+## Acknowledgments
+
+<details open>
+<summary>Click to expand!</summary>
+
+  - [OpenAI](https://github.com/openai) for their incredible GPT-3 model and API.
+  - The .NET community for providing a powerful platform and useful libraries.
+  - [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) for its high-performance JSON framework.
+  - [ OpenAI-API-dotnet](https://github.com/OkGoDoIt/OpenAI-API-dotnet) for the official .NET client library for the OpenAI API.
+  - [Spectre.Console](https://github.com/spectreconsole/spectre.console) for enabling the creation of beautiful console applications.
+</details>
 
 ## Installation
 
 The installation process for `Terminal.GPT` is automated via a `PowerShell script` that sits at the root of the repository. Here is the step-by-step process:
 
-1. Open `PowerShell` as an **Administrator**.
+1. Open `PowerShell` as an **Administrator**.⚠️IMPORTANT⚠️
 
 2. Run the following command to allow the execution of scripts:
 
 ```powershell
 Set-ExecutionPolicy Bypass -Scope Process -Force;
 ```
+ > this is required to enable remote script execution
 
 3. Download and run the installation script using the following command:
 
 ```powershell
-Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.githubusercontent.com/LemonDrop1228/Terminal.GPT/main/EasyInstall_Script.ps1')
+Invoke-Expression (Invoke-WebRequest -Uri https://raw.githubusercontent.com/LemonDrop1228/Terminal.GPT/main/EasyInstall_Script.ps1 -UseBasicParsing).Content
 ```
+ > this downloads the latest easy install script bypassing cached versions, and executes the interactive installation session
 
 
  > This script will download the latest release of Terminal.GPT, unzip the archive, move the unzipped contents to your `LOCALAPPDATA` directory, and create a shortcut on your Desktop. If an error is encountered during any of these steps, the script will clean up any files it created before the error occurred.
@@ -45,6 +63,9 @@ Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.
 
 ## Roadmap
 
+<details>
+<summary>Click to expand!</summary>
+  
 - [x] Basic terminal interface
 - [x] OpenAI API integration
 - [x] Basic chat functionality
@@ -77,7 +98,10 @@ Invoke-Expression (New-Object System.Net.WebClient).DownloadString('https://raw.
 - [ ] Shell integration (Windows)
 - [ ] Shell integration (Linux)
 - [ ] Shell integration (macOS)
-
+- [ ] OS-specific installation scripts
+- [ ] Scoop/Chocolatey package/bucket
+- [ ] OS automation - interact with your OS via Terminal.GPT and operate your computer with natural language
+</details>
 
 ## Previews
 <details>
@@ -124,13 +148,6 @@ We welcome contributions from the community. To contribute:
 
 This project is licensed under the GNU General Public License v3.0. This license allows you the freedom to use, modify, and distribute the software, but you must ensure the same freedoms for others when distributing your versions. See the `LICENSE` file for more details.
 
-## Acknowledgments
-
-- [OpenAI](https://github.com/openai) for their incredible GPT-3 model and API.
-- The .NET community for providing a powerful platform and useful libraries.
-- [Newtonsoft.Json](https://github.com/JamesNK/Newtonsoft.Json) for its high-performance JSON framework.
-- [ OpenAI-API-dotnet](https://github.com/OkGoDoIt/OpenAI-API-dotnet) for the official .NET client library for the OpenAI API.
-- [Spectre.Console](https://github.com/spectreconsole/spectre.console) for enabling the creation of beautiful console applications.
 
 ## Donation
 
