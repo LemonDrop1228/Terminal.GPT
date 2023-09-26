@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using TerminalGPT.Options;
 using TerminalGPT.Services;
 using Spectre.Console;
@@ -128,6 +129,18 @@ class Program
 
                         AnsiConsole.MarkupLine("[lime]Options all set![/]");
                         AnsiConsole.MarkupLine("[yellow]Starting up Terminal.GPT...[/]");
+                        // Write user input to appsettings.json
+                        var json = JsonConvert.SerializeObject(options, Formatting.Indented);
+
+                        try
+                        {
+                            await File.WriteAllTextAsync("appsettings.json", json);
+                        }
+                        catch (Exception ex)
+                        {
+                            AnsiConsole.MarkupLine($"[red]An error occurred trying to save your settings[/]");
+                        }
+
                         AnsiConsole.Clear();
                     }
                     else
