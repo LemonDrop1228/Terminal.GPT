@@ -53,4 +53,6 @@ public static class AppExtensions
 
         return enumerationValue.ToString();
     }
+    
+    public static bool IsNullOrWhiteSpace(this string? str) => string.IsNullOrWhiteSpace(str);
 }
