@@ -63,6 +63,9 @@ Invoke-Expression (Invoke-WebRequest -Uri https://raw.githubusercontent.com/Lemo
 
 ## Roadmap
 
+<details>
+<summary>Click to expand!</summary>
+  
 - [x] Basic terminal interface
 - [x] OpenAI API integration
 - [x] Basic chat functionality
@@ -98,7 +101,7 @@ Invoke-Expression (Invoke-WebRequest -Uri https://raw.githubusercontent.com/Lemo
 - [ ] OS-specific installation scripts
 - [ ] Scoop/Chocolatey package/bucket
 - [ ] OS automation - interact with your OS via Terminal.GPT and operate your computer with natural language
-
+</details>
 
 ## Previews
 <details>
