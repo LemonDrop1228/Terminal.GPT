@@ -137,15 +137,28 @@ try {
     $Shortcut.Save()
 }
 catch {
-    Write-Host "`nShortcut creation failed with the following exception: $_. Please make sure you're running this script as an Administrator."
-    Write-Host "Press any key to clean up and exit the script."
-    pause
-    cleanupOnError
-    exit
+    Write-Host "`nShortcut creation failed with the following exception: $_."
+    # Ask the user if they want to proceed without creating the shortcut
+    $response = Read-Host 'Would you like to proceed without creating the shortcut? (Y/N)'
+    if ($response -eq 'Y') {
+        Write-Host "`nProceeding without creating the shortcut."
+        $skipShortcut = true
+    } else {
+        Write-Host "`nPress any key to clean up and exit the script."
+        pause
+        cleanupOnError
+        exit
+    }
 }
 
 # Installation completion message
-Write-Host "`nInstallation completed! A shortcut to TerminalGPT has been created on your Desktop."
+if ($skipShortcut) {
+    Write-Host "`nTerminalGPT was installed successfully. You can find the executable at $destination\TerminalGPT.exe"
+    # Open the destination folder
+    explorer.exe $destination
+} else {
+    Write-Host "`nTerminalGPT was installed successfully. You can find the shortcut at $shortcutLocation"
+}
 
 # Ask the user if they want to add the path to the Environment Variables
 $response = Read-Host 'Would you like to add TerminalGPT to system environment variables? (Y/N)'
