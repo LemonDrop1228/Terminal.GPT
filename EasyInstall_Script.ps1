@@ -142,7 +142,8 @@ catch {
     $response = Read-Host 'Would you like to proceed without creating the shortcut? (Y/N)'
     if ($response -eq 'Y') {
         Write-Host "`nProceeding without creating the shortcut."
-        $skipShortcut = true
+        # set skipShortcut to true
+        $skipShortcut = $true
     } else {
         Write-Host "`nPress any key to clean up and exit the script."
         pause
