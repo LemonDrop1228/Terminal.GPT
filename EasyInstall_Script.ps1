@@ -181,7 +181,7 @@ catch {
 }
 
 # After the new app is installed, before the completion message
-if ($DoMigration) {
+if ($DoMigration -eq $True) {
     Write-Host "`nRestoring old app settings..."
     RestoreAppSettings -destination $destination -appSettingsContent $oldAppSettings
 }
