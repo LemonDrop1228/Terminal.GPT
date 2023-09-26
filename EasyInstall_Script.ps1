@@ -132,6 +132,7 @@ if(Test-Path -Path $shortcutLocation) {
 $WshShell = New-Object -ComObject WScript.Shell
 $Shortcut = $WshShell.CreateShortcut($shortcutLocation)
 $Shortcut.TargetPath = "$destination\TerminalGPT.exe"
+$SkipShortcut = $false
 
 try {
     $Shortcut.Save()
@@ -143,7 +144,7 @@ catch {
     if ($response -eq 'Y') {
         Write-Host "`nProceeding without creating the shortcut."
         # set skipShortcut to true
-        $skipShortcut = $true
+        $SkipShortcut = $True
     } else {
         Write-Host "`nPress any key to clean up and exit the script."
         pause
@@ -153,7 +154,7 @@ catch {
 }
 
 # Installation completion message
-if ($skipShortcut) {
+if ($SkipShortcut) {
     Write-Host "`nTerminalGPT was installed successfully. You can find the executable at $destination\TerminalGPT.exe"
     # Open the destination folder
     explorer.exe $destination
