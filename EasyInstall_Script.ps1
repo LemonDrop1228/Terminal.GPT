@@ -33,12 +33,14 @@ $url = 'https://github.com/LemonDrop1228/Terminal.GPT/releases/latest/download/T
 $file = "$env:TEMP\Terminal-GPT.zip"
 $shell = New-Object -ComObject shell.application
 $destination = "$env:LOCALAPPDATA\TerminalGPT"
+$DoMigration = $False
 
 # Check if the user wants to migrate settings
 $response = Read-Host 'Would you like to migrate your app settings? (Y/N)'
 if ($response -eq 'Y') {
     Write-Host "`nSaving old app settings..."
     $oldAppSettings = SaveAppSettings -destination $destination
+    $DoMigration = $True
 }
 
 # Cleanup function
@@ -179,7 +181,7 @@ catch {
 }
 
 # After the new app is installed, before the completion message
-if ($response -eq 'Y') {
+if ($DoMigration) {
     Write-Host "`nRestoring old app settings..."
     RestoreAppSettings -destination $destination -appSettingsContent $oldAppSettings
 }
