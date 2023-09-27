@@ -1,0 +1,23 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+{
+	"name": "C# (.NET)",
+	"image": "mcr.microsoft.com/devcontainers/dotnet:0-6.0",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	//Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "dotnet restore",
+
+	// Configure tool-specific properties.
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {					
+			// Add the IDs of extensions you want installed when the container is created.
+			"extensions": [
+				"ms-dotnettools.csharp"
+			]
+		}
+	}
+}
