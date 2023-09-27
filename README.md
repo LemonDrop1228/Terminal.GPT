@@ -48,12 +48,8 @@ Invoke-Expression (Invoke-WebRequest -Uri https://raw.githubusercontent.com/Lemo
 
  > This script will download the latest release of Terminal.GPT, unzip the archive, move the unzipped contents to your `LOCALAPPDATA` directory, and create a shortcut on your Desktop. If an error is encountered during any of these steps, the script will clean up any files it created before the error occurred.
 
-4. At the end of the installation, you'll be provided with a command you can copy and run in your PowerShell session to add Terminal.GPT to your `PATH` environment variable. This step is recommended as it allows you to run TerminalGPT from any location:
-
-```powershell
-[Environment]::SetEnvironmentVariable("PATH",`$ENV:Path+";{appPath}", [System.EnvironmentVariableTarget]::User)
-```
-#### _Notes_
+4. At the end of the installation, you'll be asked if you want to add the app to your `PATH` variable as well. It's recommended you say yes but not required though it makes running the app much easier
+   
 
 > Once these steps are complete, you can launch Terminal.GPT from any PowerShell or Command Prompt session by typing `TerminalGPT`.
 
