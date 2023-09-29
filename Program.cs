@@ -17,7 +17,7 @@ class Program
         var host = new HostBuilder()
             .ConfigureAppConfiguration((hostingContext, config) =>
             {
-                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                config.AddJsonFile("appsettings.json", optional: false);
             })
             .ConfigureServices((hostContext, services) =>
             {
@@ -99,7 +99,9 @@ class Program
                                 case "API Key":
                                     userInput = AnsiConsole.Ask<string>(
                                         "Enter the new value for the option");
-                                    userEnteredOptions.ApiKey = userInput;
+                                    userEnteredOptions.ApiKey = userInput.StartsWith("sk")
+                                        ? userInput
+                                        : null;
                                     break;
                                 case "Org ID":
                                     userInput = AnsiConsole.Ask<string>(
@@ -140,7 +142,8 @@ class Program
                         }
                         catch (Exception ex)
                         {
-                            AnsiConsole.MarkupLine($"[red]An error occurred trying to save your settings[/]");
+                            AnsiConsole.MarkupLine($"[red]An error occurred trying to save your settings:[/] {ex.Message}");
+                            Task.Delay(2000).Wait();
                         }
 
                         AnsiConsole.Clear();
