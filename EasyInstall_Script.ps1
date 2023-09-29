@@ -32,14 +32,15 @@ $client = New-Object System.Net.Http.HttpClient
 $url = 'https://github.com/LemonDrop1228/Terminal.GPT/releases/latest/download/Terminal-GPT.zip'
 $file = "$env:TEMP\Terminal-GPT.zip"
 $shell = New-Object -ComObject shell.application
-$zip = $shell.NameSpace($file)
 $destination = "$env:LOCALAPPDATA\TerminalGPT"
+$DoMigration = $False
 
 # Check if the user wants to migrate settings
 $response = Read-Host 'Would you like to migrate your app settings? (Y/N)'
 if ($response -eq 'Y') {
     Write-Host "`nSaving old app settings..."
     $oldAppSettings = SaveAppSettings -destination $destination
+    $DoMigration = $True
 }
 
 # Cleanup function
@@ -120,6 +121,7 @@ Write-Host "`nCreating destination folder at $destination"
 New-Item -Path $destination -ItemType Directory
 
 # Extracting files with progress indicator
+$zip = $shell.NameSpace($file)
 $items = $zip.items()
 $totalItems = $items.Count
 $i = 0;
@@ -179,11 +181,10 @@ catch {
 }
 
 # After the new app is installed, before the completion message
-if ($response -eq 'Y') {
+if ($DoMigration -eq $True) {
     Write-Host "`nRestoring old app settings..."
     RestoreAppSettings -destination $destination -appSettingsContent $oldAppSettings
 }
-
 
 # Installation completion message
 if ($SkipShortcut) {

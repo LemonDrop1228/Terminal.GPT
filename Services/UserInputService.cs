@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using Spectre.Console.Rendering;
+using TerminalGPT.Extensions;
 
 namespace TerminalGPT.Services;
 
@@ -38,6 +39,7 @@ public class UserInputService : IUserInputService
 
                     while (true)
                     {
+                        ctx.Refresh();
                         if (keyTask.IsCompletedSuccessfully)
                         {
                             var key = keyTask.Result;
@@ -68,11 +70,11 @@ public class UserInputService : IUserInputService
                                     break;
                                 case ConsoleKey.Escape:
                                     input.InsertRange(cursorPosition, "/Exit".ToCharArray());
-                                    cursorPosition += 5;
+                                    cursorPosition += input.Count;
                                     break;
                                 case ConsoleKey.Tab:
                                     input.InsertRange(cursorPosition, "    ".ToCharArray());
-                                    cursorPosition += 4;
+                                    cursorPosition += input.Count;
                                     break;
                                 case ConsoleKey.Home:
                                     cursorPosition = 0;
@@ -84,13 +86,13 @@ public class UserInputService : IUserInputService
                                     if (key.Modifiers == ConsoleModifiers.Control)
                                         cursorPosition = MoveBackToWordBoundary(input, cursorPosition);
                                     else
-                                        cursorPosition = Math.Max(0, cursorPosition - 1);
+                                        cursorPosition = (cursorPosition - 1) < 0 ? 0 : cursorPosition - 1;
                                     break;
                                 case ConsoleKey.RightArrow:
                                     if (key.Modifiers == ConsoleModifiers.Control)
                                         cursorPosition = MoveForwardToWordBoundary(input, cursorPosition);
                                     else
-                                        cursorPosition = Math.Min(input.Count, cursorPosition + 1);
+                                        cursorPosition = (cursorPosition + 1) > input.Count ? input.Count : cursorPosition + 1;
                                     break;
                                 default:
                                     if (!char.IsControl(key.KeyChar))
@@ -170,7 +172,7 @@ public class UserInputService : IUserInputService
         else
             markupText = $" ";
 
-        return new Panel(new Markup(isCommand ? $"{markupText}{caret}" : $"{Markup.Escape(markupText)}{caret}"))
+        return new Panel(new Markup(isCommand ? markupText.GetInputWithCursor(caret, cursorPosition) : markupText.GetInputWithCursor(caret, cursorPosition)))
             .Header(header)
             .Border(BoxBorder.Ascii)
             .HeaderAlignment(Justify.Center)

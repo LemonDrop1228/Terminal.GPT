@@ -1,4 +1,6 @@
-﻿using TerminalGPT.Constants;
+﻿using System.Text;
+using Spectre.Console;
+using TerminalGPT.Constants;
 using TerminalGPT.Options;
 
 namespace TerminalGPT.Extensions;
@@ -47,12 +49,38 @@ public static class AppExtensions
 
             if (attrs.Length > 0)
             {
-                return ((System.ComponentModel.DescriptionAttribute)attrs[0]).Description;
+                return ((System.ComponentModel.DescriptionAttribute) attrs[0]).Description;
             }
         }
 
         return enumerationValue.ToString();
+
     }
     
+    public static string GetInputWithCursor(this string input, string caret, int cursorPosition, 
+        bool escapeMarkup = true)
+    {
+        StringBuilder sb = new StringBuilder();
+
+        return cursorPosition switch
+        {
+            0 => sb.Append(caret)
+                .Append(input.GetEscapedMarkup(escapeMarkup))
+                .ToString(),
+
+            _ when cursorPosition == input.Length => sb.Append(input.GetEscapedMarkup(escapeMarkup))
+                .Append(caret)
+                .ToString(),
+        
+            _ => sb.Append(input[..cursorPosition].GetEscapedMarkup(escapeMarkup))
+                .Append(caret)
+                .Append(input[cursorPosition..].GetEscapedMarkup(escapeMarkup))
+                .ToString()
+        };
+    }
+
+    
+    public static string GetEscapedMarkup(this string input, bool escapeMarkup = true) => escapeMarkup ? Markup.Escape(input) : input;
+
     public static bool IsNullOrWhiteSpace(this string? str) => string.IsNullOrWhiteSpace(str);
 }

@@ -50,9 +50,9 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
     protected override async Task<ExitCode.Code> Run()
     {
-        if(_chatService.CurrentThread == null)
+        if (_chatService.CurrentThread == null)
             await _chatService.CreateNewThread();
-        
+
         DrawHeader();
 
         try
@@ -87,24 +87,26 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 else
                 {
                     AddItemToDisplay(input, $"{Environment.UserName} - {DateTime.Now}", true);
-                    
+
                     // get random number between 0 and 49
                     var random = new Random();
                     var randomIndex = random.Next(0, 49);
-                    
-                    
+
+
                     await AnsiConsole.Status().Spinner(Spinner.Known.Star)
-                        .StartAsync($"[cyan][bold]TerminalGPT[/][/] is thinking... Fact: #{AppConstants.GPT_FACTS[randomIndex]}", async spinnerCtx =>
-                        {
-                            await _chatService.AddMessageToCurrentThread(input, "User");
+                        .StartAsync(
+                            $"[cyan][bold]TerminalGPT[/][/] is thinking... Fact: #{AppConstants.GPT_FACTS[randomIndex]}",
+                            async spinnerCtx =>
+                            {
+                                await _chatService.AddMessageToCurrentThread(input, "User");
 
-                            spinnerCtx.Status = "[cyan][bold]TerminalGPT[/][/] is done thinking...";
-                            spinnerCtx.Spinner = Spinner.Known.Star2;
-                            spinnerCtx.SpinnerStyle = Style.Parse("green");
-                            spinnerCtx.Refresh();
+                                spinnerCtx.Status = "[cyan][bold]TerminalGPT[/][/] is done thinking...";
+                                spinnerCtx.Spinner = Spinner.Known.Star2;
+                                spinnerCtx.SpinnerStyle = Style.Parse("green");
+                                spinnerCtx.Refresh();
 
-                            Task.Delay(1000).Wait();
-                        });
+                                Task.Delay(1000).Wait();
+                            });
 
                     var response = _chatService.CurrentThread.Messages.Last().Message.Content;
 
@@ -127,8 +129,9 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
     public void DrawHeader()
     {
-        var title = $"( ::[orange1][bold]Title: {_chatService.CurrentThread.Title} | Messages: {_chatService?.CurrentThread?.Messages?.Where(m => m.Message.Role != Role.System).Count() ?? 0}[/][/]:: )";
-        
+        var title =
+            $"( ::[orange1][bold]Title: {_chatService.CurrentThread.Title} | Messages: {_chatService?.CurrentThread?.Messages?.Where(m => m.Message.Role != Role.System).Count() ?? 0}[/][/]:: )";
+
         try
         {
             AnsiConsole.Write(new FigletText(
@@ -146,7 +149,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
                     image.Resampler = new BicubicResampler();
                     image.PixelWidth = 3;
                     image.MaxWidth = 9;
-                
+
                     AnsiConsole.Render(
                         new Table().Border(TableBorder.Rounded)
                             .AddColumn("Timmy The Terminal Robot")
@@ -165,7 +168,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
                         .Centered());
 
             AnsiConsole.Render(_options.ShowChatTitle ? new Rule(title) : new Rule());
-            
+
             if (_options.ShowSystemPrompt)
                 AnsiConsole.Render(new Panel(new Markup(
                             $"[dim]{ExtractSystemPromptMessageContent()}[/]").Justify(Justify.Center)
@@ -199,39 +202,34 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
     public void AddItemToDisplay(string content, string header, bool isUser = false)
     {
-        try
-        {
-            items.Add(new Panel($"{content}").Header(isUser
-                ? $"[green][bold]{header}[/][/]"
-                : $"[cyan][bold]{header}[/][/]"));
-        }
-        catch (Exception e)
-        {
-            items.Add(new Panel($"{ScrubMarkup(content)}").Header(isUser
-                ? $"[green][bold]{header}[/][/]"
-                : $"[cyan][bold]{header}[/][/]"));
-        }
-        
-        items.Add(new Rule().RuleStyle(Style.Parse("cyan")));
-        DrawItems();
-    }
+        items.Add(new Rule(
+                isUser
+                    ? $"[bold][green]{header}[/][/]"
+                    : $"[bold][cyan]{header}[/][/]"
+            )
+            .RuleStyle(Style.Parse("grey"))
+            .Justify(Justify.Left)
+        );
+            
+        items.Add(new Panel(content).Border(BoxBorder.None));
 
-    private string ScrubMarkup(string content)
-    {
-        var regex = new Regex(@"\[(.*?)\]");
-        content = regex.Replace(content, "");
-        return content;
+        
+        DrawItems();
     }
 
     public void DrawItems()
     {
         AnsiConsole.Clear();
         DrawHeader();
+        AnsiConsole.WriteLine();
 
         foreach (var item in items)
         {
             AnsiConsole.Render(item);
+            AnsiConsole.WriteLine();
         }
+        
+        AnsiConsole.Render(new Rule().RuleStyle(Style.Parse("gold3")));
     }
 
     public async Task Help()
