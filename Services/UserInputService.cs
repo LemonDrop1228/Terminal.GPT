@@ -157,22 +157,15 @@ public class UserInputService : IUserInputService
 
         if (input1 is not null)
         {
-            var markupInput = input1.Substring(0, cursorPosition) +
-                              input1.Substring(cursorPosition);
-            if (markupInput.StartsWith("/"))
-            {
-                markupText = $"[yellow]/[/][purple]{markupInput[1..]}[/]";
+            var markupInput = input1.Substring(0, cursorPosition) + input1.Substring(cursorPosition);
+            if (markupInput.StartsWith("/")) 
                 isCommand = true;
-            }
-            else
-            {
-                markupText = markupInput;
-            }
+            markupText = markupInput;
         }
         else
             markupText = $" ";
 
-        return new Panel(new Markup(isCommand ? markupText.GetInputWithCursor(caret, cursorPosition) : markupText.GetInputWithCursor(caret, cursorPosition)))
+        return new Panel(new Markup(markupText.GetInputWithCursor(caret, cursorPosition, isCommand)))
             .Header(header)
             .Border(BoxBorder.Ascii)
             .HeaderAlignment(Justify.Center)

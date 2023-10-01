@@ -11,7 +11,7 @@ public static class AppExtensions
     {
         return values.Contains(obj);
     }
-    
+
     public static bool In(this object obj, params object[] values)
     {
         return values.Contains(obj);
@@ -23,7 +23,7 @@ public static class AppExtensions
         {
             throw new ArgumentNullException(nameof(model));
         }
-        
+
         return model switch
         {
             GPTModel.GPT4 => AppConstants.ModelDictionary[GPTModel.GPT4],
@@ -31,7 +31,7 @@ public static class AppExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(model), model, null)
         };
     }
-    
+
     // generic extension method to get description from enum
     public static string GetDescription<T>(this T enumerationValue)
         where T : struct
@@ -54,33 +54,69 @@ public static class AppExtensions
         }
 
         return enumerationValue.ToString();
-
     }
-    
-    public static string GetInputWithCursor(this string input, string caret, int cursorPosition, 
+
+    public static string GetInputWithCursor(this string input, string caret, int cursorPosition, bool isCommand = false,
         bool escapeMarkup = true)
     {
         StringBuilder sb = new StringBuilder();
 
         return cursorPosition switch
         {
-            0 => sb.Append(caret)
+            _ when cursorPosition == 0 && !isCommand => sb
+                .Append(caret)
                 .Append(input.GetEscapedMarkup(escapeMarkup))
                 .ToString(),
 
-            _ when cursorPosition == input.Length => sb.Append(input.GetEscapedMarkup(escapeMarkup))
+            _ when cursorPosition == 0 && isCommand => sb
+                .Append(caret)
+                .Append("[gold3][bold]")
+                .Append(input.GetEscapedMarkup(escapeMarkup))
+                .Append("[/][/]")
+                .ToString(),
+
+            _ when cursorPosition == input.Length && !isCommand => sb
+                .Append(input.GetEscapedMarkup(escapeMarkup))
                 .Append(caret)
                 .ToString(),
-        
-            _ => sb.Append(input[..cursorPosition].GetEscapedMarkup(escapeMarkup))
+
+            _ when cursorPosition == input.Length && isCommand => sb
+                .Append("[gold3][bold]")
+                .Append(input.GetEscapedMarkup(escapeMarkup))
+                .Append("[/][/]")
                 .Append(caret)
-                .Append(input[cursorPosition..].GetEscapedMarkup(escapeMarkup))
-                .ToString()
+                .ToString(),
+
+            _ => SandwichCursor(input, caret, cursorPosition, escapeMarkup, sb, isCommand)
         };
     }
 
-    
-    public static string GetEscapedMarkup(this string input, bool escapeMarkup = true) => escapeMarkup ? Markup.Escape(input) : input;
+    private static string SandwichCursor(string input, string caret, int cursorPosition, bool escapeMarkup,
+        StringBuilder sb, bool isCommand)
+    {
+        if (!isCommand)
+        {
+            return sb.Append(input[..cursorPosition].GetEscapedMarkup(escapeMarkup))
+                .Append(caret)
+                .Append(input[cursorPosition..].GetEscapedMarkup(escapeMarkup))
+                .ToString();
+        }
+        else
+        {
+            return sb.Append("[gold3][bold]")
+                .Append(input[..cursorPosition].GetEscapedMarkup(escapeMarkup))
+                .Append("[/][/]")
+                .Append(caret)
+                .Append("[gold3][bold]")
+                .Append(input[cursorPosition..].GetEscapedMarkup(escapeMarkup))
+                .Append("[/][/]")
+                .ToString();
+        }
+    }
+
+
+    public static string GetEscapedMarkup(this string input, bool escapeMarkup = true) =>
+        escapeMarkup ? Markup.Escape(input) : input;
 
     public static bool IsNullOrWhiteSpace(this string? str) => string.IsNullOrWhiteSpace(str);
 }

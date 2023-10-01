@@ -138,7 +138,15 @@ class Program
 
                         try
                         {
-                            await File.WriteAllTextAsync("appsettings.json", json);
+                            // Get the path to the executable that's running which may or may not be the same as the current working directory
+                            var assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                            var path = System.IO.Path.GetDirectoryName(assemblyPath) + "\\appsettings.json";
+                            
+                            // Write the path to console
+                            AnsiConsole.MarkupLine($"[yellow]Writing settings to {path}[/]");
+                            Task.Delay(2000).Wait();
+                            
+                            await File.WriteAllTextAsync(path, json);
                         }
                         catch (Exception ex)
                         {
