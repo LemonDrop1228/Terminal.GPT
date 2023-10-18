@@ -8,6 +8,7 @@ using TerminalGPT.Options;
 using Spectre.Console.Rendering;
 using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 using OpenAI.Chat;
 using SixLabors.ImageSharp.Processing.Processors.Transforms;
 using TerminalGPT.Data;
@@ -16,7 +17,6 @@ using TerminalGPT.Extensions;
 using TerminalGPT.Constants;
 
 namespace TerminalGPT.Services;
-
 public interface ITerminalChatService : IBaseService
 {
     Task Help();
@@ -27,32 +27,33 @@ public class TerminalChatService : BaseService, ITerminalChatService
 {
     private readonly IChatService _chatService;
     private readonly IOpenAIService _openAiService;
-    private readonly TerminalGptOptions _options;
     private List<IRenderable> items;
     private readonly IChatCommandService _commandService;
     private readonly IUserInputService _userInputService;
+    private readonly ISettingsService _settingsService;
 
     public TerminalChatService(
         IChatService chatService,
         IOpenAIService openAiService,
         IChatCommandService commandService,
-        IOptions<TerminalGptOptions> options,
-        IUserInputService userInputService
+        IUserInputService userInputService,
+        ISettingsService settingsService
     )
     {
         _chatService = chatService;
         _openAiService = openAiService;
         _commandService = commandService;
         _userInputService = userInputService;
-        _options = options.Value;
+        _settingsService = settingsService;
         items = new List<IRenderable>();
     }
-
+    
+    
     protected override async Task<ExitCode.Code> Run()
     {
         if (_chatService.CurrentThread == null)
             await _chatService.CreateNewThread();
-
+        
         DrawHeader();
 
         try
@@ -64,7 +65,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
                 // Hide the cursor
                 Console.CursorVisible = false;
-                while (string.IsNullOrWhiteSpace(input = await _userInputService.GetInputWithLiveDisplay()))
+                while (string.IsNullOrWhiteSpace(input = await _userInputService.GetInputWithLiveDisplay()) && !_cancellationTokenSource.Token.IsCancellationRequested)
                 {
                     await Task.Delay(1);
                 }
@@ -81,6 +82,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
 
                     if (command.CommandEnum == CommandEnum.Command.Exit)
                     {
+                        _cancellationTokenSource.Cancel();
                         return ExitCode.Code.CleanExit;
                     }
                 }
@@ -118,6 +120,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
         }
         catch (Exception e)
         {
+            _cancellationTokenSource.Cancel();
             Console.WriteLine(e);
             return ExitCode.Code.Error;
         }
@@ -141,7 +144,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 .Color(Color.Aquamarine3)
             );
 
-            if (_options.WhereArtThouTimmy)
+            if (_settingsService.Options.WhereArtThouTimmy)
             {
                 if (File.Exists("RobotImg.png"))
                 {
@@ -158,7 +161,7 @@ public class TerminalChatService : BaseService, ITerminalChatService
                 }
             }
 
-            if (_options.ShowAboutInfo)
+            if (_settingsService.Options.ShowAboutInfo)
                 AnsiConsole.Render(
                     new Table().Border(TableBorder.Rounded)
                         .AddColumn("Version")
@@ -167,9 +170,9 @@ public class TerminalChatService : BaseService, ITerminalChatService
                             "[blue][link=https://github.com/LemonDrop1228/Terminal.GPT]https://github.com/LemonDrop1228/Terminal.GPT[/][/]")
                         .Centered());
 
-            AnsiConsole.Render(_options.ShowChatTitle ? new Rule(title) : new Rule());
+            AnsiConsole.Render(_settingsService.Options.ShowChatTitle ? new Rule(title) : new Rule());
 
-            if (_options.ShowSystemPrompt)
+            if (_settingsService.Options.ShowSystemPrompt)
                 AnsiConsole.Render(new Panel(new Markup(
                             $"[dim]{ExtractSystemPromptMessageContent()}[/]").Justify(Justify.Center)
                         .Centered())
@@ -189,14 +192,14 @@ public class TerminalChatService : BaseService, ITerminalChatService
                            ?.FirstOrDefault(x => x.Message.Role == Role.System)
                            ?.Message
                            ?.Content
-                       ?? _options.SystemPrompt ?? AppConstants.DefaultSystemPromptMessage
+                       ?? _settingsService.Options.SystemPrompt ?? AppConstants.DefaultSystemPromptMessage
                     ;
             }
         }
         catch (Exception e)
         {
             AnsiConsole.WriteException(e);
-            throw;
+            _cancellationTokenSource.Cancel();
         }
     }
 

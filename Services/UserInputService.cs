@@ -92,7 +92,9 @@ public class UserInputService : IUserInputService
                                     if (key.Modifiers == ConsoleModifiers.Control)
                                         cursorPosition = MoveForwardToWordBoundary(input, cursorPosition);
                                     else
-                                        cursorPosition = (cursorPosition + 1) > input.Count ? input.Count : cursorPosition + 1;
+                                        cursorPosition = (cursorPosition + 1) > input.Count
+                                            ? input.Count
+                                            : cursorPosition + 1;
                                     break;
                                 default:
                                     if (!char.IsControl(key.KeyChar))
@@ -138,6 +140,7 @@ public class UserInputService : IUserInputService
         return 0;
     }
 
+
     private int MoveForwardToWordBoundary(List<char> input, int currentPosition)
     {
         for (int i = currentPosition; i < input.Count - 1; i++)
@@ -147,23 +150,22 @@ public class UserInputService : IUserInputService
         return input.Count;
     }
 
-
     private Panel GetPanel(string header, string input1 = null,
         int cursorPosition = 0, bool showCursor = true)
     {
         var caret = (showCursor ? "[bold][red]_[/][/]" : "[grey]_[/]");
-        var markupText = " ";
+        string markupText;
         bool isCommand = false;
 
         if (input1 is not null)
         {
-            var markupInput = input1.Substring(0, cursorPosition) + input1.Substring(cursorPosition);
-            if (markupInput.StartsWith("/")) 
-                isCommand = true;
-            markupText = markupInput;
+            isCommand = input1.StartsWith("/");
+            markupText = input1;
         }
         else
-            markupText = $" ";
+        {
+            markupText = " ";
+        }
 
         return new Panel(new Markup(markupText.GetInputWithCursor(caret, cursorPosition, isCommand)))
             .Header(header)
@@ -171,6 +173,7 @@ public class UserInputService : IUserInputService
             .HeaderAlignment(Justify.Center)
             .Expand();
     }
+
 
     private string ScrubMarkup(string content)
     {

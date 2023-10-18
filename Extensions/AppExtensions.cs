@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Newtonsoft.Json;
 using Spectre.Console;
 using TerminalGPT.Constants;
 using TerminalGPT.Options;
@@ -7,6 +8,9 @@ namespace TerminalGPT.Extensions;
 
 public static class AppExtensions
 {
+    public static string ToJson(this object obj) => JsonConvert.SerializeObject(obj, Formatting.Indented);
+    public static T FromJson<T>(this string json) => JsonConvert.DeserializeObject<T>(json);
+    
     public static bool In<T>(this T obj, params T[] values)
     {
         return values.Contains(obj);

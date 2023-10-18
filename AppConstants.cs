@@ -1,4 +1,5 @@
-﻿using TerminalGPT.Options;
+﻿using System.Reflection;
+using TerminalGPT.Options;
 
 namespace TerminalGPT.Constants;
 
@@ -794,4 +795,6 @@ $  $@@
         "50. Why doesn’t ChatGPT need a break? Because it has already broken all the expectations."
     };
 
+    
+    public static string SettingsPath => Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\appsettings.json";
 }
