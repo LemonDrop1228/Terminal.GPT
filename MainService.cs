@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 using Spectre.Console;
 using TerminalGPT.Options;
 using Microsoft.Extensions.Options;
@@ -16,12 +17,12 @@ namespace TerminalGPT.Services
         private readonly IChatCommandService _chatCommandService;
 
         public MainService(
-            ITerminalChatService terminalChatService, 
-            IOpenAIService openAiService, 
+            ITerminalChatService terminalChatService,
+            IOpenAIService openAiService,
             IMenuService menuService,
             IExitService exitService,
             IChatCommandService chatCommandService
-            )
+        )
         {
             _terminalChatService = terminalChatService;
             _openAiService = openAiService;
@@ -33,7 +34,6 @@ namespace TerminalGPT.Services
         public async Task Run()
         {
             _chatCommandService.InitializeCommands();
-            
             try
             {
                 while (ServiceMode.Value != ServiceMode.Mode.Exit)
@@ -45,23 +45,22 @@ namespace TerminalGPT.Services
                         ServiceMode.Mode.Exit => await _exitService.Exit(),
                         _ => throw new ArgumentOutOfRangeException()
                     };
-                    
+
                     if (main == ExitCode.Code.CleanExit)
                     {
-                        break;
+                        ServiceMode.Set(ServiceMode.Mode.Exit);
                     }
                     else if (main == ExitCode.Code.Error)
                     {
                         Console.WriteLine("An error occurred. Exiting...");
-                        // placeholder for error reporting
                         Console.WriteLine("Press any key to exit...");
                         Console.ReadLine();
                         ServiceMode.Set(ServiceMode.Mode.Exit);
                     }
-                    
-                    if(ServiceMode.Value == ServiceMode.Mode.Exit)
+
+                    if (ServiceMode.Value == ServiceMode.Mode.Exit)
                         break;
-                    
+
                     ServiceMode.Set
                     (
                         ServiceMode.Value switch
@@ -71,15 +70,11 @@ namespace TerminalGPT.Services
                         }
                     );
                 }
-                
-                
-                
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                Console.ReadLine();
-                Environment.Exit(0);
+                ExitCode.Set(ExitCode.Code.Error);
             }
         }
     }
